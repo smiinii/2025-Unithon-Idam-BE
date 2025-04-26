@@ -1,0 +1,26 @@
+package com.team7.Idam.domain.user.entity;
+
+import jakarta.persistence.*;
+import lombok.*;
+
+@Entity
+@Table(name = "portfolio")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class Portfolio {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "portfolio_id")
+    private Long portfolioId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private Student student;
+
+    @Column(length = 255, nullable = false)
+    private String portfolio; // 실제 저장된 파일 경로나 URL
+}
