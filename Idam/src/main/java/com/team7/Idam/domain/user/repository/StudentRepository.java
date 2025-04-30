@@ -7,4 +7,7 @@ import java.util.Optional;
 
 public interface StudentRepository extends JpaRepository<Student, Long> {
     Optional<Student> findByUserId(Long userId);
+
+    boolean existsByNickname(String nickname); // 별명 중복 방지
+    boolean existsBySchoolId(String schoolId); // 학번 중복 방지
 }

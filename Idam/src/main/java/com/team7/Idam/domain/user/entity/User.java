@@ -5,8 +5,6 @@ import lombok.*;
 import com.team7.Idam.domain.user.entity.enums.UserType;
 import com.team7.Idam.domain.user.entity.enums.UserStatus;
 
-import java.time.LocalDateTime;
-
 @Entity
 @Table(name = "user")  // DB 테이블 이름
 @Getter
@@ -31,6 +29,6 @@ public class User {
     @Column(name = "user_status", nullable = false, length = 20)
     private UserStatus userStatus = UserStatus.ACTIVE;  // 기본값은 ACTIVE
 
-    @Column(length = 20)
+    @Column(length = 20, unique = true)
     private String phone;
 }
