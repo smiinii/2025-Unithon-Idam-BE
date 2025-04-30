@@ -25,7 +25,7 @@ public class Student {
     @Column(nullable = false, length = 50)
     private String name;
 
-    @Column(length = 50)
+    @Column(length = 50, unique = true)
     private String nickname;
 
     @Column(name = "school_name", length = 100)
@@ -34,8 +34,11 @@ public class Student {
     @Column(length = 100)
     private String major;
 
-    @Column(name = "school_id", length = 50)
+    @Column(name = "school_id", length = 50, unique = true)
     private String schoolId;
+
+    @Column(nullable = false, length = 255)
+    private String password;
 
     @Column(name = "profile_image", length = 255)
     private String profileImage;

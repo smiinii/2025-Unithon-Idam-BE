@@ -52,6 +52,7 @@ public class UserDataInitializer implements CommandLineRunner {
                                         .schoolName("인천대학교")
                                         .major("정보통신공학과")
                                         .schoolId("2023" + String.format("%05d", idx))
+                                        .password("{noop}student1234")
                                         .profileImage("default-student.jpg")
                                         .gender((idx % 2 == 0) ? Gender.FEMALE : Gender.MALE)
                                         .build()
