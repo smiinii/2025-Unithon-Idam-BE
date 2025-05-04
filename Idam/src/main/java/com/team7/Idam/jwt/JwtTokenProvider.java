@@ -61,7 +61,10 @@ public class JwtTokenProvider {
         }
     }
 
-    // Claims 추출
+    // 토큰 -> Claims 추출
+    /*
+        Claims에는 userId, username, role, email 같은 정보들이 담겨있음.
+    */
     private Claims parseClaims(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(secretKey)
@@ -74,7 +77,7 @@ public class JwtTokenProvider {
         return parseClaims(token);
     }
 
-    // userId 꺼내기
+    // 토큰 -> userId 꺼내기
     public Long getUserIdFromToken(String token) {
         Claims claims = getClaims(token);
         return Long.parseLong(claims.getSubject());

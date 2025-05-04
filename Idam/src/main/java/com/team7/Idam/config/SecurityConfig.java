@@ -19,6 +19,7 @@ public class SecurityConfig {
 
     private final JwtTokenProvider jwtTokenProvider;
 
+    // BCrypt >> 비밀번호를 "단방향 해시"로 안전하게 변환해주는 암호화 알고리즘
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -28,16 +29,18 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
+                // CSRF 토큰 검증 비활성화(-> JWT토큰으로 대체)
                 .csrf(csrf -> csrf.disable())
+                // 경로별로 접근 허용 여부 설정
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/api/signup/**",   // 회원가입 허용
                                 "/api/login/**",    // 로그인 허용
-                                "/api/refresh",     // 토큰 재발급 허용
-                                "/api/logout"       // 로그아웃 허용
-                        ).permitAll()
+                                "/api/refresh"      // 토큰 재발급 허용
+                        ).permitAll() // 누구나 요청 허용
                         .anyRequest().authenticated()  // 나머지는 인증 필요
                 )
+                // 기본 필터 앞에 JWT 검증 필터 삽입
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
