@@ -123,7 +123,7 @@ public class AuthService {
 
         String accessToken = jwtTokenProvider.generateAccessToken(user.getId(), user.getUserType().name());
         String refreshToken = jwtTokenProvider.generateRefreshToken();
-        refreshTokenStore.save(user.getId(), refreshToken);
+        refreshTokenStore.save(user.getId(), request.getDeviceId(), refreshToken);
 
         return new LoginResultDto(accessToken, refreshToken, user.getUserType().name());
     }
@@ -146,14 +146,14 @@ public class AuthService {
 
         String accessToken = jwtTokenProvider.generateAccessToken(user.getId(), user.getUserType().name());
         String refreshToken = jwtTokenProvider.generateRefreshToken();
-        refreshTokenStore.save(user.getId(), refreshToken);
+        refreshTokenStore.save(user.getId(), request.getDeviceId(), refreshToken);
 
         return new LoginResultDto(accessToken, refreshToken, user.getUserType().name());
     }
 
     // Refresh Token으로 Access Token 재발급
-    public LoginResultDto reissueToken(Long userId, String refreshToken) {
-        String storedRefreshToken = refreshTokenStore.get(userId);
+    public LoginResultDto reissueToken(Long userId, String deviceId, String refreshToken) {
+        String storedRefreshToken = refreshTokenStore.get(userId, deviceId);
 
         if (storedRefreshToken == null || !storedRefreshToken.equals(refreshToken)) {
             throw new IllegalArgumentException("Refresh Token이 유효하지 않습니다.");
@@ -164,7 +164,7 @@ public class AuthService {
 
         String newAccessToken = jwtTokenProvider.generateAccessToken(user.getId(), user.getUserType().name());
         String newRefreshToken = jwtTokenProvider.generateRefreshToken();
-        refreshTokenStore.save(user.getId(), newRefreshToken);
+        refreshTokenStore.save(user.getId(), deviceId, newRefreshToken);
 
         return new LoginResultDto(newAccessToken, newRefreshToken, user.getUserType().name());
     }
