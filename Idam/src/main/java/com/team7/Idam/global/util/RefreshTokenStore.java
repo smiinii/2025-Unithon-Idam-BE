@@ -1,25 +1,40 @@
 package com.team7.Idam.global.util;
 
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @Component
 public class RefreshTokenStore {
 
-    private final Map<Long, String> refreshTokenStore = new ConcurrentHashMap<>();
+    private final RedisTemplate<String, String> redisTemplate;
+    private final long refreshTokenValidity = 7 * 24 * 60 * 60; // 7일 (초 단위)
 
-    // 유저 아이디와 refreshToken을 해시 형태(key, value)로 저장.
-    public void save(Long userId, String refreshToken) {
-        refreshTokenStore.put(userId, refreshToken);
+    public RefreshTokenStore(RedisTemplate<String, String> redisTemplate) {
+        this.redisTemplate = redisTemplate;
     }
 
-    public String get(Long userId) {
-        return refreshTokenStore.get(userId);
+    // 저장 (디바이스별 저장, TTL 설정)
+    public void save(Long userId, String deviceId, String refreshToken) {
+        String key = buildKey(userId, deviceId);
+        redisTemplate.opsForValue().set(key, refreshToken, refreshTokenValidity, TimeUnit.SECONDS);
     }
 
-    public void delete(Long userId) {
-        refreshTokenStore.remove(userId);
+    // 조회
+    public String get(Long userId, String deviceId) {
+        String key = buildKey(userId, deviceId);
+        return redisTemplate.opsForValue().get(key);
+    }
+
+    // 삭제
+    public void delete(Long userId, String deviceId) {
+        String key = buildKey(userId, deviceId);
+        redisTemplate.delete(key);
+    }
+
+    // key 생성
+    private String buildKey(Long userId, String deviceId) {
+        return "refreshToken:" + userId + ":" + deviceId;
     }
 }

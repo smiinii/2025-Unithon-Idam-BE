@@ -48,7 +48,6 @@ public class StudentSignupRequestDto {
     @NotNull
     private Gender gender;
 
-    @NotBlank
     @Size(max = 255)
     private String profileImage;
 }

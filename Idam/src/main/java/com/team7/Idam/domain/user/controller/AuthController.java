@@ -55,18 +55,17 @@ public class AuthController {
 
     // Refresh Token으로 Access Token 재발급
     @PostMapping("/api/refresh")
-    public ResponseEntity<LoginResponseDto> reissueToken(@RequestParam Long userId, HttpServletRequest request, HttpServletResponse response) {
-        // 쿠키에 저장된 refreshToken을 사용하여 재발급 후, 다시 쿠키에 저장.
+    public ResponseEntity<LoginResponseDto> reissueToken(@RequestParam Long userId, @RequestParam String deviceId, HttpServletRequest request, HttpServletResponse response) {
         String refreshToken = extractRefreshTokenFromCookie(request);
-        LoginResultDto newTokens = authService.reissueToken(userId, refreshToken);
+        LoginResultDto newTokens = authService.reissueToken(userId, deviceId, refreshToken);
         addRefreshTokenToCookie(response, newTokens.getRefreshToken());
         return ResponseEntity.ok(new LoginResponseDto(newTokens.getAccessToken(), newTokens.getUserType()));
     }
 
     // 로그아웃
     @PostMapping("/api/logout")
-    public ResponseEntity<String> logout(@RequestParam Long userId, HttpServletResponse response) {
-        refreshTokenStore.delete(userId); // refreshToken 삭제
+    public ResponseEntity<String> logout(@RequestParam Long userId, @RequestParam String deviceId, HttpServletResponse response) {
+        refreshTokenStore.delete(userId, deviceId); // refreshToken 삭제
 
         Cookie expiredCookie = new Cookie("refreshToken", null);
         expiredCookie.setHttpOnly(true);
