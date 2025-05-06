@@ -53,15 +53,6 @@ public class AuthController {
         return ResponseEntity.ok(new LoginResponseDto(loginResult.getAccessToken(), loginResult.getUserType()));
     }
 
-    // Refresh Token으로 Access Token 재발급
-    @PostMapping("/api/refresh")
-    public ResponseEntity<LoginResponseDto> reissueToken(@RequestParam Long userId, @RequestParam String deviceId, HttpServletRequest request, HttpServletResponse response) {
-        String refreshToken = extractRefreshTokenFromCookie(request);
-        LoginResultDto newTokens = authService.reissueToken(userId, deviceId, refreshToken);
-        addRefreshTokenToCookie(response, newTokens.getRefreshToken());
-        return ResponseEntity.ok(new LoginResponseDto(newTokens.getAccessToken(), newTokens.getUserType()));
-    }
-
     // 로그아웃
     @PostMapping("/api/logout")
     public ResponseEntity<String> logout(@RequestParam Long userId, @RequestParam String deviceId, HttpServletResponse response) {
@@ -98,5 +89,14 @@ public class AuthController {
             }
         }
         throw new IllegalArgumentException("Refresh Token 쿠키가 존재하지 않습니다.");
+    }
+
+    // Refresh Token으로 Access Token 재발급
+    @PostMapping("/api/refresh")
+    public ResponseEntity<LoginResponseDto> reissueToken(@RequestParam Long userId, @RequestParam String deviceId, HttpServletRequest request, HttpServletResponse response) {
+        String refreshToken = extractRefreshTokenFromCookie(request);
+        LoginResultDto newTokens = authService.reissueToken(userId, deviceId, refreshToken);
+        addRefreshTokenToCookie(response, newTokens.getRefreshToken());
+        return ResponseEntity.ok(new LoginResponseDto(newTokens.getAccessToken(), newTokens.getUserType()));
     }
 }
