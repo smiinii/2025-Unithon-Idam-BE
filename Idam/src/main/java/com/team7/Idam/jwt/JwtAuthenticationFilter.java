@@ -26,11 +26,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
 
+        String uri = request.getRequestURI();
+
+        // ✅ /api/refresh, /api/logout, /api/login, api/signup 경로는 accessToken 검증 스킵
+        if (uri.startsWith("/api/refresh") || uri.startsWith("/api/logout") ||
+                uri.startsWith("/api/login") || uri.startsWith("/api/signup")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         String token = resolveToken(request);
 
         if (token != null && jwtTokenProvider.validateToken(token)) { // NotNull, 토큰 유효 시
             Long userId = jwtTokenProvider.getUserIdFromToken(token);
-            // Claims -> userId, username, role, email 같은 정보들이 담겨있음.
             Claims claims = jwtTokenProvider.getClaims(token);
 
             UsernamePasswordAuthenticationToken authentication =
@@ -55,4 +63,3 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         return null;
     }
 }
-

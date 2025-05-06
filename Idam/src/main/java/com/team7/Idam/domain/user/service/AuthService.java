@@ -15,6 +15,8 @@ import com.team7.Idam.global.util.RefreshTokenStore;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 
 @Service
 @RequiredArgsConstructor
@@ -153,6 +155,10 @@ public class AuthService {
 
     // Refresh Token으로 Access Token 재발급
     public LoginResultDto reissueToken(Long userId, String deviceId, String refreshToken) {
+        if (refreshToken == null) {
+            throw new IllegalArgumentException("Refresh Token이 존재하지 않습니다.");
+        }
+
         String storedRefreshToken = refreshTokenStore.get(userId, deviceId);
 
         if (storedRefreshToken == null || !storedRefreshToken.equals(refreshToken)) {
