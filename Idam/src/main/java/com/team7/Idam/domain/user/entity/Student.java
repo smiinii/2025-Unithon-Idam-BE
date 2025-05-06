@@ -4,6 +4,9 @@ import com.team7.Idam.domain.user.entity.enums.Gender;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "student")
 @Getter
@@ -46,4 +49,12 @@ public class Student {
     @Enumerated(EnumType.STRING)
     @Column(nullable = true, length = 10)
     private Gender gender;
+
+    @ManyToMany
+    @JoinTable(
+            name = "student_tag",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "tag_id")
+    )
+    private List<TagOption> tags = new ArrayList<>();
 }
