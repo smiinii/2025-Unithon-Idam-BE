@@ -107,46 +107,30 @@ public class AuthService {
         companyRepository.save(company);
     }
 
-    // 학생 로그인
-    public LoginResultDto loginStudent(LoginRequestDto request) {
+    // 로그인
+    public LoginResultDto login(LoginRequestDto request) {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 이메일입니다."));
 
-        if (user.getUserType() != UserType.STUDENT) {
-            throw new IllegalArgumentException("학생 계정이 아닙니다.");
+        String raw = request.getPassword();
+        String encoded;
+        if (user.getUserType() == UserType.STUDENT) {
+            Student student = studentRepository.findById(user.getId())
+                    .orElseThrow(() -> new IllegalArgumentException("학생 정보가 존재하지 않습니다."));
+            encoded = student.getPassword();
+        } else if (user.getUserType() == UserType.COMPANY) {
+            Company company = companyRepository.findById(user.getId())
+                    .orElseThrow(() -> new IllegalArgumentException("기업 정보가 존재하지 않습니다."));
+            encoded = company.getPassword();
+        } else {
+            throw new IllegalArgumentException("지원하지 않는 사용자 타입입니다.");
         }
 
-        Student student = studentRepository.findById(user.getId())
-                .orElseThrow(() -> new IllegalArgumentException("학생 정보가 존재하지 않습니다."));
-
-        if (!passwordEncoder.matches(request.getPassword(), student.getPassword())) {
+        if (!passwordEncoder.matches(raw, encoded)) {
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
         }
 
-        String accessToken = jwtTokenProvider.generateAccessToken(user.getId(), user.getUserType().name());
-        String refreshToken = jwtTokenProvider.generateRefreshToken();
-        refreshTokenStore.save(user.getId(), request.getDeviceId(), refreshToken);
-
-        return new LoginResultDto(accessToken, refreshToken, user.getUserType().name());
-    }
-
-    // 기업 로그인
-    public LoginResultDto loginCompany(LoginRequestDto request) {
-        User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 이메일입니다."));
-
-        if (user.getUserType() != UserType.COMPANY) {
-            throw new IllegalArgumentException("기업 계정이 아닙니다.");
-        }
-
-        Company company = companyRepository.findById(user.getId())
-                .orElseThrow(() -> new IllegalArgumentException("기업 정보가 존재하지 않습니다."));
-
-        if (!passwordEncoder.matches(request.getPassword(), company.getPassword())) {
-            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
-        }
-
-        String accessToken = jwtTokenProvider.generateAccessToken(user.getId(), user.getUserType().name());
+        String accessToken  = jwtTokenProvider.generateAccessToken(user.getId(), user.getUserType().name());
         String refreshToken = jwtTokenProvider.generateRefreshToken();
         refreshTokenStore.save(user.getId(), request.getDeviceId(), refreshToken);
 

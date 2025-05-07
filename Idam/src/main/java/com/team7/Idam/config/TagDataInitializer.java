@@ -82,10 +82,10 @@ public class TagDataInitializer implements CommandLineRunner {
         tagOptionRepository.save(figmaTag);
 
         // marketing Tags
-        TagOption ShoppingMallOperationTag = new TagOption();
-        ShoppingMallOperationTag.setTagName("ShoppingMall Operation");
-        ShoppingMallOperationTag.setCategory(marketing);
-        tagOptionRepository.save(ShoppingMallOperationTag);
+        TagOption shoppingMallOperationTag = new TagOption();
+        shoppingMallOperationTag.setTagName("ShoppingMall Operation");
+        shoppingMallOperationTag.setCategory(marketing);
+        tagOptionRepository.save(shoppingMallOperationTag);
 
         TagOption SNSManagementTag = new TagOption();
         SNSManagementTag.setTagName("SNS Management");

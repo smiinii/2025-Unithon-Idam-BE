@@ -37,20 +37,17 @@ public class AuthController {
         return ResponseEntity.ok("기업 회원가입이 완료되었습니다.");
     }
 
-    // 학생 로그인
-    @PostMapping("/api/login/student")
-    public ResponseEntity<LoginResponseDto> loginStudent(@Valid @RequestBody LoginRequestDto request, HttpServletResponse response) {
-        LoginResultDto loginResult = authService.loginStudent(request);
+    // 로그인
+    @PostMapping("/api/login")
+    public ResponseEntity<LoginResponseDto> login(@Valid @RequestBody LoginRequestDto request, HttpServletResponse response) {
+        LoginResultDto loginResult = authService.login(request);
         addRefreshTokenToCookie(response, loginResult.getRefreshToken());
-        return ResponseEntity.ok(new LoginResponseDto(loginResult.getAccessToken(), loginResult.getUserType()));
-    }
-
-    // 기업 로그인
-    @PostMapping("/api/login/company")
-    public ResponseEntity<LoginResponseDto> loginCompany(@Valid @RequestBody LoginRequestDto request, HttpServletResponse response) {
-        LoginResultDto loginResult = authService.loginCompany(request);
-        addRefreshTokenToCookie(response, loginResult.getRefreshToken());
-        return ResponseEntity.ok(new LoginResponseDto(loginResult.getAccessToken(), loginResult.getUserType()));
+        return ResponseEntity.ok(
+                new LoginResponseDto(
+                        loginResult.getAccessToken(),
+                        loginResult.getUserType()
+                )
+        );
     }
 
     // 로그아웃
