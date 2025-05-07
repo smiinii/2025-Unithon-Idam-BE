@@ -39,7 +39,6 @@ public class CompanySignupRequestDto {
     @Size(max = 20)
     private String phone;
 
-    @NotBlank
     @Size(max = 255)
     private String profileImage;
 }
