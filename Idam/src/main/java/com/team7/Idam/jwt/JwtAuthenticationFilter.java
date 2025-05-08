@@ -1,6 +1,7 @@
 package com.team7.Idam.jwt;
 
-import io.jsonwebtoken.Claims;
+import com.team7.Idam.domain.user.entity.User;
+import com.team7.Idam.domain.user.repository.UserRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -11,15 +12,12 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.Collections;
 
-/*
-    JWT 사용자 인증 필터
- */
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider jwtTokenProvider;
+    private final UserRepository userRepository;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -28,7 +26,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String uri = request.getRequestURI();
 
-        // ✅ /api/refresh, /api/logout, /api/login, api/signup 경로는 accessToken 검증 스킵
         if (uri.startsWith("/api/refresh") || uri.startsWith("/api/logout") ||
                 uri.startsWith("/api/login") || uri.startsWith("/api/signup")) {
             filterChain.doFilter(request, response);
@@ -37,12 +34,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String token = resolveToken(request);
 
-        if (token != null && jwtTokenProvider.validateToken(token)) { // NotNull, 토큰 유효 시
+        if (token != null && jwtTokenProvider.validateToken(token)) {
             Long userId = jwtTokenProvider.getUserIdFromToken(token);
-            Claims claims = jwtTokenProvider.getClaims(token);
+
+            User user = userRepository.findById(userId)
+                    .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+            CustomUserDetails customUserDetails = new CustomUserDetails(user);
 
             UsernamePasswordAuthenticationToken authentication =
-                    new UsernamePasswordAuthenticationToken(userId, null, Collections.emptyList());
+                    new UsernamePasswordAuthenticationToken(
+                            customUserDetails, null, customUserDetails.getAuthorities()
+                    );
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
         }
@@ -50,11 +53,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-    /*
-        http 요청 헤더에서 Authorization 값 꺼내옴.
-        -> Bearer로 시작하는 지 확인. -> Bearer 제외 7자(= Token)만 반환.
-        토큰 문자열이 없다면 null 반환.
-    */
     private String resolveToken(HttpServletRequest request) {
         String bearerToken = request.getHeader("Authorization");
         if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
