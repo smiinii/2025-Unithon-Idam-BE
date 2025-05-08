@@ -1,5 +1,6 @@
 package com.team7.Idam.config;
 
+import com.team7.Idam.domain.user.repository.UserRepository;
 import com.team7.Idam.jwt.JwtRefreshAuthenticationFilter;
 import com.team7.Idam.jwt.JwtTokenProvider;
 import com.team7.Idam.jwt.JwtAuthenticationFilter;
@@ -19,6 +20,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 public class SecurityConfig {
 
     private final JwtTokenProvider jwtTokenProvider;
+    private final UserRepository userRepository;
 
     // BCrypt >> 비밀번호를 "단방향 해시"로 안전하게 변환해주는 암호화 알고리즘
     @Bean
@@ -29,7 +31,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         // accessToken 검증 필터 (refresh, logout 경로는 검증 스킵하도록 내부에 작성함)
-        JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(jwtTokenProvider);
+        JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(jwtTokenProvider, userRepository);
         // refreshToken 검증 필터 (refresh, logout 경로만 검증하도록 내부에 작성함)
         JwtRefreshAuthenticationFilter jwtRefreshAuthenticationFilter = new JwtRefreshAuthenticationFilter(jwtTokenProvider);
 
