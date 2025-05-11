@@ -132,8 +132,8 @@ public class AuthService {
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
         }
 
-        List<String> roles = List.of("USER");  // ✅ USER
-        // List<String> roles = List.of("ADMIN");  // ✅ ADMIN -> 이건 따로 어드민 만들때 사용(학생, 기업 외 어드민 로그인 장치 마련)
+        List<String> roles = List.of("USER");  // USER
+        // List<String> roles = List.of("ADMIN");  // ADMIN -> 이건 따로 어드민 만들때 사용(학생, 기업 외 어드민 로그인 장치 마련)
         String accessToken = jwtTokenProvider.generateAccessToken(user.getId(), user.getUserType().name(), roles);
         String refreshToken = jwtTokenProvider.generateRefreshToken();
         refreshTokenStore.save(user.getId(), request.getDeviceId(), refreshToken);
