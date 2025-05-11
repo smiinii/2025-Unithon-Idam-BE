@@ -24,6 +24,12 @@ public class TagDataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
+        // 더미데이터 중복 삽입 방지
+        if (tagCategoryRepository.count() > 0 || tagOptionRepository.count() > 0) {
+            System.out.println("TagInitializer: 이미 데이터가 존재하여 초기화를 건너뜁니다.");
+            return;
+        }
+
         // 1. 카테고리 생성
         TagCategory itCategory = new TagCategory();
         itCategory.setCategoryName("IT·프로그래밍");
@@ -114,6 +120,6 @@ public class TagDataInitializer implements CommandLineRunner {
             studentRepository.save(student3);
         }
 
-        System.out.println("✅ TagInitializer: 더미 데이터 초기화 완료!");
+        System.out.println("TagInitializer: 더미 데이터 초기화 완료!");
     }
 }

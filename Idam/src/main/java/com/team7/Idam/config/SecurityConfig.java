@@ -30,6 +30,7 @@ public class SecurityConfig {
     private final JwtTokenProvider jwtTokenProvider;
     private final UserRepository userRepository;
 
+    // BCrypt >> 비밀번호를 "단방향 해시"로 안전하게 변환해주는 암호화 알고리즘
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -70,6 +71,11 @@ public class SecurityConfig {
                 .build();
     }
 
+    // AuthenticationManager Bean 등록
+    /*
+        유효한 사용자인지(로그인 성공인지 실패인지) 검증.
+        Spring Security 내부에 이미 설정된 인증 로직을 빈으로 등록.
+     */
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
         return configuration.getAuthenticationManager();

@@ -15,6 +15,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -25,8 +26,11 @@ public class StudentProfileService {
     private final StudentRepository studentRepository;
     private final PortfolioRepository portfolioRepository;
     private final TagOptionRepository tagOptionRepository;
+    private final FileUploadService fileUploadService;
 
-    // 학생 프로필 조회
+    /*
+        학생 프로필 전체 조회
+     */
     public StudentProfileResponseDto getStudentProfile(Long studentId) {
         Student student = studentRepository.findById(studentId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 학생을 찾을 수 없습니다."));
@@ -44,7 +48,9 @@ public class StudentProfileService {
                 .build();
     }
 
-    // 학생 프로필 수정
+    /*
+        학생 프로필 정보 수정
+     */
     public void updateStudentProfile(Long studentId, StudentProfileUpdateRequestDto request) {
         Student student = studentRepository.findById(studentId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 학생을 찾을 수 없습니다."));
@@ -70,7 +76,44 @@ public class StudentProfileService {
         return userDetails.getId();
     }
 
-    // 포트폴리오 추가
+    /*
+        프로필 이미지 업로드
+     */
+    public void updateProfileImage(Long studentId, MultipartFile file) {
+        Student student = studentRepository.findById(studentId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 학생을 찾을 수 없습니다."));
+
+        if (student.getProfileImage() != null) { // 프로필 이미지 이미 존재 시
+            fileUploadService.delete(student.getProfileImage()); // S3에서 삭제
+        }
+
+        String imageUrl = fileUploadService.upload(file); // S3에 저장
+
+        student.setProfileImage(imageUrl);
+        studentRepository.save(student);
+    }
+
+    /*
+        프로필 이미지 삭제
+     */
+    public void deleteProfileImage(Long studentId) {
+        Student student = studentRepository.findById(studentId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 학생을 찾을 수 없습니다."));
+
+        String imageUrl = student.getProfileImage();
+        if (imageUrl == null) {
+            throw new SecurityException("삭제할 프로필 이미지가 없습니다.");
+        }
+
+        fileUploadService.delete(imageUrl); // S3에서 삭제
+
+        student.setProfileImage(null);
+        studentRepository.save(student);
+    }
+
+    /*
+        포트폴리오 추가
+     */
     public void addPortfolio(Long studentId, PortfolioRequestDto request) {
         Student student = studentRepository.findById(studentId)
                 .orElseThrow(() -> new IllegalArgumentException("학생을 찾을 수 없습니다."));
@@ -88,7 +131,9 @@ public class StudentProfileService {
         portfolioRepository.save(portfolio);
     }
 
-    // 포트폴리오 삭제
+    /*
+        포트폴리오 삭제
+     */
     public void deletePortfolio(Long studentId, Long portfolioId) {
         Portfolio portfolio = portfolioRepository.findById(portfolioId)
                 .orElseThrow(() -> new IllegalArgumentException("포트폴리오를 찾을 수 없습니다."));
@@ -100,7 +145,9 @@ public class StudentProfileService {
         portfolioRepository.delete(portfolio);
     }
 
-    // 태그 추가
+    /*
+        태그 추가
+     */
     public void addStudentTag(Long studentId, Long tagId) {
         Student student = studentRepository.findById(studentId)
                 .orElseThrow(() -> new IllegalArgumentException("학생을 찾을 수 없습니다."));
@@ -116,7 +163,9 @@ public class StudentProfileService {
         studentRepository.save(student);
     }
 
-    // 태그 수정
+    /*
+        태그 수정
+     */
     public void updateStudentTags(Long studentId, List<Long> tagIds) {
         Student student = studentRepository.findById(studentId)
                 .orElseThrow(() -> new IllegalArgumentException("학생을 찾을 수 없습니다."));
@@ -127,7 +176,9 @@ public class StudentProfileService {
         studentRepository.save(student);
     }
 
-    // 태그 삭제
+    /*
+        태그 삭제
+     */
     public void removeStudentTag(Long studentId, Long tagId) {
         Student student = studentRepository.findById(studentId)
                 .orElseThrow(() -> new IllegalArgumentException("학생을 찾을 수 없습니다."));
