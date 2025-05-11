@@ -1,0 +1,82 @@
+package com.team7.Idam.domain.task.service;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.team7.Idam.domain.task.client.AiTagClient;
+import com.team7.Idam.domain.task.dto.AiTagRequestDto;
+import com.team7.Idam.domain.task.dto.AiTagResultDto;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+import reactor.core.publisher.Mono;
+import java.util.Set;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+
+@Service
+public class AiTagService {
+
+    private static final Logger log = LoggerFactory.getLogger(AiTagService.class);
+
+    private final AiTagClient aiTagClient;
+    private final ObjectMapper objectMapper;
+
+    public AiTagService(AiTagClient aiTagClient, ObjectMapper objectMapper) {
+        this.aiTagClient = aiTagClient;
+        this.objectMapper = objectMapper;
+    }
+
+    public Mono<List<String>> fetchDeduplicatedTagList(AiTagRequestDto requestDto) {
+        return aiTagClient.getAiTag(requestDto.getDomain(), requestDto.getPrompt())
+                .map(jsonString -> {
+                    log.info("🔥 서비스 수신된 Raw JSON: {}", jsonString);
+                    try {
+                        List<AiTagResultDto> resultList = objectMapper.readValue(
+                                jsonString,
+                                new TypeReference<List<AiTagResultDto>>() {}
+                        );
+
+                        // ✅ 중복 제거용 Set
+                        Set<String> tagSet = new HashSet<>();
+                        for (AiTagResultDto dto : resultList) {
+                            if (dto == null) continue;
+
+                            if (dto.getDomain() != null) tagSet.add(dto.getDomain().trim());
+                            if (dto.getRole() != null) tagSet.add(dto.getRole().trim());
+
+                            if (dto.getLanguages() != null) {
+                                dto.getLanguages().stream()
+                                        .filter(Objects::nonNull)
+                                        .map(String::trim)
+                                        .forEach(tagSet::add);
+                            }
+
+                            if (dto.getFrameworks() != null) {
+                                dto.getFrameworks().values().forEach(list -> list.stream()
+                                        .filter(Objects::nonNull)
+                                        .map(String::trim)
+                                        .forEach(tagSet::add));
+                            }
+
+                            if (dto.getTools() != null) {
+                                dto.getTools().values().forEach(list -> list.stream()
+                                        .filter(Objects::nonNull)
+                                        .map(String::trim)
+                                        .forEach(tagSet::add));
+                            }
+                        }
+
+                        List<String> deduplicatedTags = new ArrayList<>(tagSet);
+                        log.info("🔥 최종 deduplicated 태그: {}", deduplicatedTags);
+
+                        return deduplicatedTags;
+
+                    } catch (Exception e) {
+                        log.error("🔥 서비스 JSON 파싱 실패", e);
+                        throw new RuntimeException("서비스 JSON 파싱 실패", e);
+                    }
+                });
+    }
+}

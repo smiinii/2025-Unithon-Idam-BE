@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
+import java.util.List;
 
 @Component
 public class JwtTokenProvider {
@@ -26,13 +27,14 @@ public class JwtTokenProvider {
     }
 
     // AccessToken 발급
-    public String generateAccessToken(Long userId, String userType) {
+    public String generateAccessToken(Long userId, String userType, List<String> roles) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + accessTokenExpirationMillis);
 
         return Jwts.builder()
                 .setSubject(String.valueOf(userId))
                 .claim("userType", userType)
+                .claim("roles", roles)  // ✅ roles 추가
                 .setIssuedAt(now)
                 .setExpiration(expiryDate)
                 .signWith(secretKey, SignatureAlgorithm.HS256)
