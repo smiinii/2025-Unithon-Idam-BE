@@ -18,6 +18,8 @@ import org.springframework.stereotype.Service;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -130,7 +132,9 @@ public class AuthService {
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
         }
 
-        String accessToken  = jwtTokenProvider.generateAccessToken(user.getId(), user.getUserType().name());
+        List<String> roles = List.of("USER");  // ✅ USER
+        // List<String> roles = List.of("ADMIN");  // ✅ ADMIN -> 이건 따로 어드민 만들때 사용(학생, 기업 외 어드민 로그인 장치 마련)
+        String accessToken = jwtTokenProvider.generateAccessToken(user.getId(), user.getUserType().name(), roles);
         String refreshToken = jwtTokenProvider.generateRefreshToken();
         refreshTokenStore.save(user.getId(), request.getDeviceId(), refreshToken);
 
@@ -152,7 +156,11 @@ public class AuthService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
 
-        String newAccessToken = jwtTokenProvider.generateAccessToken(user.getId(), user.getUserType().name());
+        List<String> roles = user.getUserType() == UserType.STUDENT
+                ? List.of("USER")
+                : List.of("ADMIN");
+        String newAccessToken = jwtTokenProvider.generateAccessToken(user.getId(), user.getUserType().name(), roles);
+
         String newRefreshToken = jwtTokenProvider.generateRefreshToken();
         refreshTokenStore.save(user.getId(), deviceId, newRefreshToken);
 
