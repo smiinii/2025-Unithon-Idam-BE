@@ -1,5 +1,6 @@
 package com.team7.Idam.domain.user.entity;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -15,7 +16,8 @@ public class TagCategory {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long categoryId;
+    @Column(name = "category_id")
+    private Long id;
 
     @Column(nullable = false, length = 100)
     private String categoryName;
