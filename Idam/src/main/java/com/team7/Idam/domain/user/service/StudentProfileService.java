@@ -10,6 +10,7 @@ import com.team7.Idam.domain.user.repository.PortfolioRepository;
 import com.team7.Idam.domain.user.repository.StudentRepository;
 import com.team7.Idam.domain.user.repository.TagOptionRepository;
 import com.team7.Idam.jwt.CustomUserDetails;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
@@ -17,7 +18,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -51,6 +54,7 @@ public class StudentProfileService {
     /*
         학생 프로필 정보 수정
      */
+    @Transactional
     public void updateStudentProfile(Long studentId, StudentProfileUpdateRequestDto request) {
         Student student = studentRepository.findById(studentId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 학생을 찾을 수 없습니다."));
@@ -114,6 +118,7 @@ public class StudentProfileService {
     /*
         포트폴리오 추가
      */
+    @Transactional
     public void addPortfolio(Long studentId, PortfolioRequestDto request) {
         Student student = studentRepository.findById(studentId)
                 .orElseThrow(() -> new IllegalArgumentException("학생을 찾을 수 없습니다."));
@@ -134,6 +139,7 @@ public class StudentProfileService {
     /*
         포트폴리오 삭제
      */
+    @Transactional
     public void deletePortfolio(Long studentId, Long portfolioId) {
         Portfolio portfolio = portfolioRepository.findById(portfolioId)
                 .orElseThrow(() -> new IllegalArgumentException("포트폴리오를 찾을 수 없습니다."));
@@ -146,51 +152,21 @@ public class StudentProfileService {
     }
 
     /*
-        태그 추가
+        태그 추가/수정
      */
-    public void addStudentTag(Long studentId, Long tagId) {
+    @Transactional
+    public void updateStudentTagsByName(Long studentId, Long categoryId, List<String> tagNames) {
         Student student = studentRepository.findById(studentId)
                 .orElseThrow(() -> new IllegalArgumentException("학생을 찾을 수 없습니다."));
 
-        TagOption tag = tagOptionRepository.findById(tagId)
-                .orElseThrow(() -> new IllegalArgumentException("태그를 찾을 수 없습니다."));
+        // 카테고리 내에서만 태그 찾기
+        List<TagOption> tags = tagOptionRepository.findAllByTagNameInAndCategoryId(tagNames, categoryId);
 
-        if (student.getTags().contains(tag)) {
-            throw new IllegalArgumentException("이미 추가된 태그입니다.");
+        if (tags.size() != tagNames.size()) {
+            throw new IllegalArgumentException("해당 카테고리에서 일치하지 않는 태그명이 존재합니다.");
         }
 
-        student.getTags().add(tag);
-        studentRepository.save(student);
-    }
-
-    /*
-        태그 수정
-     */
-    public void updateStudentTags(Long studentId, List<Long> tagIds) {
-        Student student = studentRepository.findById(studentId)
-                .orElseThrow(() -> new IllegalArgumentException("학생을 찾을 수 없습니다."));
-
-        List<TagOption> newTags = tagOptionRepository.findAllById(tagIds);
-
-        student.setTags(newTags);
-        studentRepository.save(student);
-    }
-
-    /*
-        태그 삭제
-     */
-    public void removeStudentTag(Long studentId, Long tagId) {
-        Student student = studentRepository.findById(studentId)
-                .orElseThrow(() -> new IllegalArgumentException("학생을 찾을 수 없습니다."));
-
-        TagOption tag = tagOptionRepository.findById(tagId)
-                .orElseThrow(() -> new IllegalArgumentException("태그를 찾을 수 없습니다."));
-
-        if (!student.getTags().contains(tag)) {
-            throw new IllegalArgumentException("학생에게 해당 태그가 존재하지 않습니다.");
-        }
-
-        student.getTags().remove(tag);
+        student.setTags(new HashSet<>(tags));
         studentRepository.save(student);
     }
 }

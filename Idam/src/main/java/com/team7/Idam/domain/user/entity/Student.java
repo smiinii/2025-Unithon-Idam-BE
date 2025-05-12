@@ -4,8 +4,8 @@ import com.team7.Idam.domain.user.entity.enums.Gender;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "student")
@@ -56,5 +56,11 @@ public class Student {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "tag_id")
     )
-    private List<TagOption> tags = new ArrayList<>();
+    private Set<TagOption> tags = new HashSet<>();
+
+    public void setTags(Set<TagOption> tags) {
+        this.tags.clear();        // 기존 태그 초기화
+        this.tags.addAll(tags);   // 새 태그 추가
+    }
+
 }

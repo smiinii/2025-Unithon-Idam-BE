@@ -28,14 +28,14 @@ public class AuthController {
     @PostMapping("/api/signup/student")
     public ResponseEntity<ApiResponse> signupStudent(@Valid @RequestBody StudentSignupRequestDto request) {
         authService.signupStudent(request);
-        return ResponseEntity.ok(new ApiResponse("학생 회원가입이 완료되었습니다."));
+        return ResponseEntity.ok(ApiResponse.success("학생 회원가입이 완료되었습니다."));
     }
 
     // 기업 회원가입
     @PostMapping("/api/signup/company")
     public ResponseEntity<ApiResponse> signupCompany(@Valid @RequestBody CompanySignupRequestDto request) {
         authService.signupCompany(request);
-        return ResponseEntity.ok(new ApiResponse("기업 회원가입이 완료되었습니다."));
+        return ResponseEntity.ok(ApiResponse.success("기업 회원가입이 완료되었습니다."));
     }
 
     // 로그인
@@ -63,7 +63,7 @@ public class AuthController {
         expiredCookie.setMaxAge(0); // 쿠키 즉시 만료
         response.addCookie(expiredCookie);
 
-        return ResponseEntity.ok(new ApiResponse("로그아웃이 완료되었습니다."));
+        return ResponseEntity.ok(ApiResponse.success("로그아웃이 완료되었습니다."));
     }
 
     // Refresh Token을 쿠키에 저장 (로그인, 재발급 시 사용)
