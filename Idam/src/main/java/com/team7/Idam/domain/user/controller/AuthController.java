@@ -10,6 +10,7 @@ import com.team7.Idam.global.util.RefreshTokenStore;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.team7.Idam.global.dto.ApiResponse;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -25,16 +26,16 @@ public class AuthController {
 
     // 학생 회원가입
     @PostMapping("/api/signup/student")
-    public ResponseEntity<String> signupStudent(@Valid @RequestBody StudentSignupRequestDto request) {
+    public ResponseEntity<ApiResponse> signupStudent(@Valid @RequestBody StudentSignupRequestDto request) {
         authService.signupStudent(request);
-        return ResponseEntity.ok("학생 회원가입이 완료되었습니다.");
+        return ResponseEntity.ok(new ApiResponse("학생 회원가입이 완료되었습니다."));
     }
 
     // 기업 회원가입
     @PostMapping("/api/signup/company")
-    public ResponseEntity<String> signupCompany(@Valid @RequestBody CompanySignupRequestDto request) {
+    public ResponseEntity<ApiResponse> signupCompany(@Valid @RequestBody CompanySignupRequestDto request) {
         authService.signupCompany(request);
-        return ResponseEntity.ok("기업 회원가입이 완료되었습니다.");
+        return ResponseEntity.ok(new ApiResponse("기업 회원가입이 완료되었습니다."));
     }
 
     // 로그인
@@ -52,7 +53,7 @@ public class AuthController {
 
     // 로그아웃
     @PostMapping("/api/logout")
-    public ResponseEntity<String> logout(@RequestParam Long userId, @RequestParam String deviceId, HttpServletResponse response) {
+    public ResponseEntity<ApiResponse> logout(@RequestParam Long userId, @RequestParam String deviceId, HttpServletResponse response) {
         refreshTokenStore.delete(userId, deviceId); // refreshToken 삭제
 
         Cookie expiredCookie = new Cookie("refreshToken", null);
@@ -62,7 +63,7 @@ public class AuthController {
         expiredCookie.setMaxAge(0); // 쿠키 즉시 만료
         response.addCookie(expiredCookie);
 
-        return ResponseEntity.ok("로그아웃이 완료되었습니다.");
+        return ResponseEntity.ok(new ApiResponse("로그아웃이 완료되었습니다."));
     }
 
     // Refresh Token을 쿠키에 저장 (로그인, 재발급 시 사용)
