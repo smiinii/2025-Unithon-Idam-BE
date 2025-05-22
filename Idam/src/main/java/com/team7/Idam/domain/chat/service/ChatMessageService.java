@@ -41,19 +41,29 @@ public class ChatMessageService {
         return ChatMessageResponseDto.from(savedMessage);
     }
 
-    // 2. 메시지 목록 조회 (DTO 반환)
     public List<ChatMessageResponseDto> getMessagesByRoom(Long roomId, User user) {
         ChatRoom room = chatRoomRepository.findById(roomId)
                 .orElseThrow(() -> new IllegalArgumentException("채팅방이 존재하지 않습니다."));
 
+        // 💥 유저가 채팅방의 소속이 아니면 차단
         if (!room.getCompany().equals(user) && !room.getStudent().equals(user)) {
             throw new SecurityException("이 채팅방에 접근할 수 없습니다.");
+        }
+
+        // 💥 삭제된 채팅방이라면 차단
+        boolean deletedForThisUser =
+                (room.getCompany().equals(user) && room.isDeletedByCompany()) ||
+                        (room.getStudent().equals(user) && room.isDeletedByStudent());
+
+        if (deletedForThisUser) {
+            throw new SecurityException("삭제된 채팅방입니다.");
         }
 
         return chatMessageRepository.findByChatRoomOrderBySentAtAsc(room).stream()
                 .map(ChatMessageResponseDto::from)
                 .collect(Collectors.toList());
     }
+
 
     // 3. 메시지 읽음 처리
     @Transactional
