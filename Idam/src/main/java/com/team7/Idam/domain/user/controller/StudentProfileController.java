@@ -1,6 +1,5 @@
 package com.team7.Idam.domain.user.controller;
 
-import com.team7.Idam.domain.user.dto.profile.PortfolioRequestDto;
 import com.team7.Idam.domain.user.dto.profile.StudentProfileResponseDto;
 import com.team7.Idam.domain.user.dto.profile.StudentProfileUpdateRequestDto;
 import com.team7.Idam.domain.user.service.StudentProfileService;
@@ -49,9 +48,13 @@ public class StudentProfileController {
 
     // 포트폴리오 추가
     @PostMapping("/{studentId}/portfolios")
-    public ResponseEntity<ApiResponse<Void>> addPortfolio(@PathVariable Long studentId, @RequestBody PortfolioRequestDto request) {
-        studentService.addPortfolio(studentId, request);
-        return ResponseEntity.ok(ApiResponse.success("포트폴리오가 추가되었습니다."));
+    public ResponseEntity<ApiResponse<Void>> addPortfolio(
+            @PathVariable Long studentId,
+            @RequestPart(required = false) MultipartFile portfolioFile,
+            @RequestPart(required = false) String portfolioUrl) {
+
+        studentService.addPortfolio(studentId, portfolioFile, portfolioUrl);
+        return ResponseEntity.ok(ApiResponse.success("포트폴리오가 등록되었습니다."));
     }
 
     // 포트폴리오 삭제
