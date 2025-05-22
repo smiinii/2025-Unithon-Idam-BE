@@ -8,4 +8,6 @@ import java.util.List;
 
 @Repository
 public interface TagOptionRepository extends JpaRepository<TagOption, Long> {
-    List<TagOption> findAllByTagNameInAndCategoryId(List<String> tagNames, Long categoryId);}
+    List<TagOption> findAllByTagNameInAndCategoryId(List<String> tagNames, Long categoryId);
+    List<TagOption> findAllByCategoryId(Long categoryId);
+}
