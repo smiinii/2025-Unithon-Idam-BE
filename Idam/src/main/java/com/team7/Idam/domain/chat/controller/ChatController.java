@@ -27,11 +27,11 @@ public class ChatController {
     // 채팅방 생성 (기업이 학생과)
     @PostMapping("/room")
     public ResponseEntity<ChatRoomResponseDto> createRoom(
-            @RequestParam Long studentId,
+            @RequestParam Long targetUserId,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         User managedCompany = userService.getUserById(userDetails.getId());
-        User managedStudent = userService.getUserById(studentId);
+        User managedStudent = userService.getUserById(targetUserId);
         System.out.println(">> 로그인한 유저 ID: " + managedCompany.getId());
         return ResponseEntity.ok(chatRoomService.createRoom(managedCompany, managedStudent));
     }
