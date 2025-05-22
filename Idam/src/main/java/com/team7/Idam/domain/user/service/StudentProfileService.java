@@ -1,6 +1,5 @@
 package com.team7.Idam.domain.user.service;
 
-import com.team7.Idam.domain.user.dto.profile.PortfolioRequestDto;
 import com.team7.Idam.domain.user.dto.profile.StudentProfileResponseDto;
 import com.team7.Idam.domain.user.dto.profile.StudentProfileUpdateRequestDto;
 import com.team7.Idam.domain.user.entity.Portfolio;
@@ -20,7 +19,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -119,18 +117,32 @@ public class StudentProfileService {
         포트폴리오 추가
      */
     @Transactional
-    public void addPortfolio(Long studentId, PortfolioRequestDto request) {
+    public void addPortfolio(Long studentId, MultipartFile file, String url) {
+        // 둘 다 비어있을 때
+        if (file == null && (url == null || url.isBlank())) {
+            throw new IllegalArgumentException("파일 또는 URL 중 하나는 반드시 입력되어야 합니다.");
+        }
+
+        // 둘 다 있을 때 → 허용하지 않음
+        if (file != null && url != null && !url.isBlank()) {
+            throw new IllegalArgumentException("불가능한 접근입니다.");
+        }
+
         Student student = studentRepository.findById(studentId)
                 .orElseThrow(() -> new IllegalArgumentException("학생을 찾을 수 없습니다."));
 
-        boolean exists = portfolioRepository.existsByStudentIdAndPortfolio(studentId, request.getPortfolio());
+        String portfolioValue = (file != null)
+                ? fileUploadService.upload(file)
+                : url;
+
+        boolean exists = portfolioRepository.existsByStudentIdAndPortfolio(studentId, portfolioValue);
         if (exists) {
             throw new IllegalArgumentException("이미 동일한 포트폴리오가 등록되어 있습니다.");
         }
 
         Portfolio portfolio = Portfolio.builder()
                 .student(student)
-                .portfolio(request.getPortfolio())
+                .portfolio(portfolioValue)
                 .build();
 
         portfolioRepository.save(portfolio);
@@ -148,7 +160,19 @@ public class StudentProfileService {
             throw new SecurityException("본인만 삭제할 수 있습니다.");
         }
 
+        String portfolioValue = portfolio.getPortfolio();
+
+        // 파일 형식이면 S3에서 삭제
+        if (isS3FileUrl(portfolioValue)) {
+            fileUploadService.delete(portfolioValue);
+        }
+
         portfolioRepository.delete(portfolio);
+    }
+
+    // 간단한 S3 URL 판별 메서드
+    private boolean isS3FileUrl(String url) {
+        return url != null && url.contains(".s3.") && url.contains("amazonaws.com");
     }
 
     /*
