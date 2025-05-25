@@ -143,7 +143,7 @@ public class AuthService {
         String refreshToken = jwtTokenProvider.generateRefreshToken();
         refreshTokenStore.save(user.getId(), request.getDeviceId(), refreshToken);
 
-        return new LoginResultDto(accessToken, refreshToken, user.getUserType().name(), user.getId().toString());
+        return new LoginResultDto(accessToken, refreshToken, user.getUserType().name(), user.getId());
     }
 
     // Refresh Token으로 Access Token 재발급
@@ -169,6 +169,6 @@ public class AuthService {
         String newRefreshToken = jwtTokenProvider.generateRefreshToken();
         refreshTokenStore.save(user.getId(), deviceId, newRefreshToken);
 
-        return new LoginResultDto(newAccessToken, newRefreshToken, user.getUserType().name(), user.getId().toString());
+        return new LoginResultDto(newAccessToken, newRefreshToken, user.getUserType().name(), user.getId());
     }
 }
