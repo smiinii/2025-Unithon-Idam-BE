@@ -7,6 +7,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.HandshakeInterceptor;
 
+import java.net.URI;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.Map;
 
 @Component
@@ -19,24 +23,24 @@ public class JwtHandshakeInterceptor implements HandshakeInterceptor {
     public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response,
                                    WebSocketHandler wsHandler, Map<String, Object> attributes) {
 
-        String uri = request.getURI().toString();
-        String token = null;
+        URI uri = request.getURI();
+        Map<String, String> queryParams = parseQueryParams(uri.getRawQuery());
 
-        // 쿼리 파라미터에서 token 추출
-        if (uri.contains("token=")) {
-            token = uri.substring(uri.indexOf("token=") + 6);
-            int ampIndex = token.indexOf('&'); // 여러 쿼리 파라미터 대비
-            if (ampIndex != -1) {
-                token = token.substring(0, ampIndex);
+        String token = queryParams.get("token");
+
+        if (token != null) {
+            try {
+                if (jwtTokenProvider.validateToken(token)) {
+                    Long userId = jwtTokenProvider.getUserIdFromToken(token);
+                    attributes.put("userId", userId);
+                    System.out.println("✅ WebSocket 인증 성공, userId: " + userId);
+                    return true;
+                } else {
+                    System.out.println("❌ JWT 유효하지 않음");
+                }
+            } catch (Exception e) {
+                System.out.println("❌ JWT 파싱 오류: " + e.getMessage());
             }
-        }
-
-        // 토큰 유효성 검사
-        if (token != null && jwtTokenProvider.validateToken(token)) {
-            Long userId = jwtTokenProvider.getUserIdFromToken(token);
-            attributes.put("userId", userId); // WebSocket 세션에 저장
-            System.out.println("✅ WebSocket 인증 성공, userId: " + userId);
-            return true;
         }
 
         System.out.println("❌ WebSocket 인증 실패: JWT 누락 또는 유효하지 않음");
@@ -47,5 +51,20 @@ public class JwtHandshakeInterceptor implements HandshakeInterceptor {
     public void afterHandshake(ServerHttpRequest request, ServerHttpResponse response,
                                WebSocketHandler wsHandler, Exception exception) {
         // 생략 가능
+    }
+
+    private Map<String, String> parseQueryParams(String rawQuery) {
+        Map<String, String> result = new HashMap<>();
+        if (rawQuery == null) return result;
+
+        for (String param : rawQuery.split("&")) {
+            String[] parts = param.split("=", 2);
+            if (parts.length == 2) {
+                String key = URLDecoder.decode(parts[0], StandardCharsets.UTF_8);
+                String value = URLDecoder.decode(parts[1], StandardCharsets.UTF_8);
+                result.put(key, value);
+            }
+        }
+        return result;
     }
 }
