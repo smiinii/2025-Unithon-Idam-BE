@@ -51,7 +51,8 @@ public class SecurityConfig {
                                 "/api/login",
                                 "/api/refresh",
                                 "/api/ai-tag",
-                                "/api/categories/**"
+                                "/api/categories/**",
+                                "/ws/**"  // ✅ 추가: WebSocket 경로 인증 예외
                         ).permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/**").hasAnyRole("USER", "ADMIN")
