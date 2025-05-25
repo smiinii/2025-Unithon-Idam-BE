@@ -52,7 +52,12 @@ public class SecurityConfig {
                                 "/api/refresh",
                                 "/api/ai-tag",
                                 "/api/categories/**",
-                                "/ws/**"  // ✅ 추가: WebSocket 경로 인증 예외
+                                // 🔥 WebSocket 관련 경로들
+                                "/ws/**",
+                                "/ws/chat/**",
+                                "/ws/chat/info",
+                                "/info",
+                                "/sockjs-node/**"
                         ).permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/**").hasAnyRole("USER", "ADMIN")
