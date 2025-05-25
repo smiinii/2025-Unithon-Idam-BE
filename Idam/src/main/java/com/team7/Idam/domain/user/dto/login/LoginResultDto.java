@@ -13,5 +13,5 @@ public class LoginResultDto {
     private String accessToken;
     private String refreshToken;
     private String userType;
-    private String userId;
+    private Long userId;
 }
