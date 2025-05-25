@@ -26,4 +26,9 @@ public class TagOption {
 
     @ManyToMany(mappedBy = "tags")
     private List<Student> students = new ArrayList<>();
+
+    public TagOption(String tagName, TagCategory category) {
+        this.tagName = tagName;
+        this.category = category;
+    }
 }

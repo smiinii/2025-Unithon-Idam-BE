@@ -27,6 +27,7 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "user_status", nullable = false, length = 20)
+    @Builder.Default
     private UserStatus userStatus = UserStatus.ACTIVE;  // 기본값은 ACTIVE
 
     @Column(length = 20, unique = true)

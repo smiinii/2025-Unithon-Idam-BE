@@ -40,10 +40,12 @@ public class ChatRoom {
 
     // 삭제 여부 (soft delete)
     @Column(name = "is_deleted_by_company", nullable = false)
+    @Builder.Default
     private boolean isDeletedByCompany = false;
 
     // 삭제 여부 (soft delete)
     @Column(name = "is_deleted_by_student", nullable = false)
+    @Builder.Default
     private boolean isDeletedByStudent = false;
 
     @PrePersist

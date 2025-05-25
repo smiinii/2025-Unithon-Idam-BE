@@ -59,6 +59,7 @@ public class JwtTokenProvider {
             parseClaims(token);
             return true;
         } catch (JwtException | IllegalArgumentException e) {
+            System.out.println("JWT 유효성 검증 실패: " + e.getClass().getSimpleName() + " - " + e.getMessage());
             return false;
         }
     }

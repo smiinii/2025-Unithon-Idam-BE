@@ -28,9 +28,11 @@ public class RefreshTokenStore {
     }
 
     // 삭제
-    public void delete(Long userId, String deviceId) {
+    public boolean delete(Long userId, String deviceId) {
         String key = buildKey(userId, deviceId);
+        Boolean existed = redisTemplate.hasKey(key);
         redisTemplate.delete(key);
+        return Boolean.TRUE.equals(existed);
     }
 
     // key 생성

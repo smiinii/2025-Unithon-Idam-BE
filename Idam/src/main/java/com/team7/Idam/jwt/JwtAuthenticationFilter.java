@@ -35,8 +35,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         System.out.println("🔥 요청 URI: " + uri);
         System.out.println("🔥 들어온 Authorization 헤더: " + request.getHeader("Authorization"));
 
-        if (uri.startsWith("/api/refresh") || uri.startsWith("/api/logout") ||
-                uri.startsWith("/api/login") || uri.startsWith("/api/signup")) {
+        if (uri.startsWith("/api/refresh") || uri.startsWith("/api/login") || uri.startsWith("/api/signup")) {
             filterChain.doFilter(request, response);
             return;
         }
