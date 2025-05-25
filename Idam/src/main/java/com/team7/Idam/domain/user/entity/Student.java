@@ -19,11 +19,16 @@ public class Student {
     @Id
     private Long id;
 
-    /* User의 ID를 FK + PK로 삼는 종속 엔티티 */
+    /* <User> id를 FK + PK로 삼는 종속 엔티티 */
     @OneToOne
-    @MapsId
-    @JoinColumn(name = "id")  // FK이자 PK
+    @MapsId // PK
+    @JoinColumn(name = "id")  // FK (User)
     private User user;
+
+    /* <TagCategory> category_id를 FK로 삼는 종속 엔티티 */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id") // FK (TagCategory)
+    private TagCategory category;
 
     @Column(nullable = false, length = 50)
     private String name;
@@ -50,14 +55,22 @@ public class Student {
     @Column(nullable = true, length = 10)
     private Gender gender;
 
+    /*
+        student_tag 테이블 생성 / <student>와 <student_tag> 다대다 관계
+        -> user_id (FK to student.id)
+        -> tag_id  (FK to tag_option.id)
+     */
     @ManyToMany
     @JoinTable(
             name = "student_tag",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "tag_id")
     )
+    // Student가 가지고 있는 TagOption 목록 (Set으로 중복 허용 X)
+    @Builder.Default
     private Set<TagOption> tags = new HashSet<>();
 
+    // 태그 수정
     public void setTags(Set<TagOption> tags) {
         this.tags.clear();        // 기존 태그 초기화
         this.tags.addAll(tags);   // 새 태그 추가

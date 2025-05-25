@@ -7,6 +7,7 @@ import com.team7.Idam.domain.user.dto.login.LoginRequestDto;
 import com.team7.Idam.domain.user.entity.*;
 import com.team7.Idam.domain.user.entity.enums.UserType;
 import com.team7.Idam.domain.user.entity.enums.UserStatus;
+import com.team7.Idam.domain.user.repository.TagCategoryRepository;
 import com.team7.Idam.domain.user.repository.UserRepository;
 import com.team7.Idam.domain.user.repository.StudentRepository;
 import com.team7.Idam.domain.user.repository.CompanyRepository;
@@ -15,8 +16,6 @@ import com.team7.Idam.global.util.RefreshTokenStore;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
 
 import java.util.List;
 
@@ -27,6 +26,7 @@ public class AuthService {
     private final UserRepository userRepository;
     private final StudentRepository studentRepository;
     private final CompanyRepository companyRepository;
+    private final TagCategoryRepository tagCategoryRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final RefreshTokenStore refreshTokenStore;
@@ -49,6 +49,10 @@ public class AuthService {
             throw new IllegalArgumentException("이미 등록된 학번입니다.");
         }
 
+        // 💡 카테고리 이름으로 TagCategory 조회
+        TagCategory category = tagCategoryRepository.findByCategoryName(request.getCategoryName())
+                .orElseThrow(() -> new IllegalArgumentException("해당하는 분야가 존재하지 않습니다."));
+
         // User 생성
         User user = User.builder()
                 .email(request.getEmail())
@@ -69,6 +73,7 @@ public class AuthService {
                 .password(passwordEncoder.encode(request.getPassword()))
                 .gender(request.getGender())
                 .profileImage(request.getProfileImage())
+                .category(category)
                 .build();
         studentRepository.save(student);
     }

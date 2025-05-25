@@ -50,4 +50,8 @@ public class StudentSignupRequestDto {
 
     @Size(max = 255)
     private String profileImage;
+
+    @NotBlank
+    @Size(max = 20)
+    private String categoryName;
 }

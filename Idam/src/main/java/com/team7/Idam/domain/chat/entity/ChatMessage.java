@@ -36,6 +36,7 @@ public class ChatMessage {
     private LocalDateTime sentAt;
 
     @Column(name = "is_read", nullable = false)
+    @Builder.Default
     private boolean isRead = false;
 
     @PrePersist

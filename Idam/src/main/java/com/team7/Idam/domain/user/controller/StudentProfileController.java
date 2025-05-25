@@ -2,14 +2,13 @@ package com.team7.Idam.domain.user.controller;
 
 import com.team7.Idam.domain.user.dto.profile.StudentProfileResponseDto;
 import com.team7.Idam.domain.user.dto.profile.StudentProfileUpdateRequestDto;
+import com.team7.Idam.domain.user.dto.profile.UpdateTagsRequestDto;
 import com.team7.Idam.domain.user.service.StudentProfileService;
 import com.team7.Idam.global.dto.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/students")
@@ -65,10 +64,15 @@ public class StudentProfileController {
     }
 
     // 태그 추가/수정
-    @PutMapping("/{studentId}/categories/{categoryId}/tags")
-    public ResponseEntity<ApiResponse<Void>> updateStudentTags(@PathVariable Long studentId, @PathVariable Long categoryId, @RequestBody List<String> tagNames) {
-        studentService.updateStudentTagsByName(studentId, categoryId, tagNames);
+    @PutMapping("/{userId}/categories/{categoryId}/tags")
+    public ResponseEntity<ApiResponse<Void>> updateStudentTags(
+            @PathVariable Long userId,
+            @PathVariable Long categoryId,
+            @RequestBody UpdateTagsRequestDto request
+    ) {
+        studentService.updateStudentTagsByName(userId, categoryId, request);
         return ResponseEntity.ok(ApiResponse.success("태그가 수정되었습니다."));
     }
+
 
 }

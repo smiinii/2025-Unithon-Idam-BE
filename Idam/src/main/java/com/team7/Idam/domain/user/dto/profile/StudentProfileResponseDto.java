@@ -16,4 +16,5 @@ public class StudentProfileResponseDto {
     private String profileImage;
     private String email;
     private String phone;
+    private Long categoryId;
 }
