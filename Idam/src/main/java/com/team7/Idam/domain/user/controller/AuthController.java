@@ -1,11 +1,8 @@
 package com.team7.Idam.domain.user.controller;
 
-import com.team7.Idam.domain.user.dto.login.LogoutRequestDto;
+import com.team7.Idam.domain.user.dto.login.*;
 import com.team7.Idam.domain.user.dto.signup.StudentSignupRequestDto;
 import com.team7.Idam.domain.user.dto.signup.CompanySignupRequestDto;
-import com.team7.Idam.domain.user.dto.login.LoginRequestDto;
-import com.team7.Idam.domain.user.dto.login.LoginResponseDto;
-import com.team7.Idam.domain.user.dto.login.LoginResultDto;
 import com.team7.Idam.domain.user.service.AuthService;
 import com.team7.Idam.global.util.RefreshTokenStore;
 import com.team7.Idam.jwt.CustomUserDetails;
@@ -49,11 +46,13 @@ public class AuthController {
         return ResponseEntity.ok(
                 new LoginResponseDto(
                         loginResult.getAccessToken(),
-                        loginResult.getUserType()
+                        loginResult.getUserType(),
+                        loginResult.getUserId()
                 )
         );
     }
 
+    // 로그아웃
     @PostMapping("/api/logout")
     public ResponseEntity<ApiResponse<Void>> logout(
             @AuthenticationPrincipal CustomUserDetails userDetails,
@@ -105,10 +104,11 @@ public class AuthController {
 
     // Refresh Token으로 Access Token 재발급
     @PostMapping("/api/refresh")
-    public ResponseEntity<LoginResponseDto> reissueToken(@RequestParam Long userId, @RequestParam String deviceId, HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<RefreshTokenResponseDto> reissueToken(@RequestParam Long userId, @RequestParam String deviceId, HttpServletRequest request, HttpServletResponse response) {
         String refreshToken = extractRefreshTokenFromCookie(request);
         LoginResultDto newTokens = authService.reissueToken(userId, deviceId, refreshToken);
         addRefreshTokenToCookie(response, newTokens.getRefreshToken());
-        return ResponseEntity.ok(new LoginResponseDto(newTokens.getAccessToken(), newTokens.getUserType()));
+        return ResponseEntity.ok(new RefreshTokenResponseDto(newTokens.getAccessToken()));
     }
 }
+

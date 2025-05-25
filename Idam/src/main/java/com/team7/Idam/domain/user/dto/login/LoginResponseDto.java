@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 /*
-    [Controller → 클라이언트 응답] 할 때 사용. accessToken + userType만 응답.
+    [Controller → 클라이언트 응답] 할 때 사용. accessToken + userType + userId만 응답.
     (refreshToken은 응답하지 않고, 쿠키에만 저장)
  */
 @Getter
@@ -12,4 +12,5 @@ import lombok.Getter;
 public class LoginResponseDto {
     private String accessToken;
     private String userType;
+    private String userId;
 }
