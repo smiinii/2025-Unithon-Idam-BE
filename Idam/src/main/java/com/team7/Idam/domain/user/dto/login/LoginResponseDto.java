@@ -12,5 +12,5 @@ import lombok.Getter;
 public class LoginResponseDto {
     private String accessToken;
     private String userType;
-    private String userId;
+    private Long userId;
 }
