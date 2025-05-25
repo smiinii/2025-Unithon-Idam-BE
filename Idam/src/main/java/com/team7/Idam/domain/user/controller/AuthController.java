@@ -43,13 +43,16 @@ public class AuthController {
     public ResponseEntity<LoginResponseDto> login(@Valid @RequestBody LoginRequestDto request, HttpServletResponse response) {
         LoginResultDto loginResult = authService.login(request);
         addRefreshTokenToCookie(response, loginResult.getRefreshToken());
-        return ResponseEntity.ok(
-                new LoginResponseDto(
-                        loginResult.getAccessToken(),
-                        loginResult.getUserType(),
-                        loginResult.getUserId()
-                )
+
+        LoginResponseDto dto = new LoginResponseDto(
+                loginResult.getAccessToken(),
+                loginResult.getUserType(),
+                loginResult.getUserId()
         );
+
+        System.out.println("🔥 LoginResponseDto: " + dto); // 로그 찍기
+
+        return ResponseEntity.ok(dto);
     }
 
     // 로그아웃
