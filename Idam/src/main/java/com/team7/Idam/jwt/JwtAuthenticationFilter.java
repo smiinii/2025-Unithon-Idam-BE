@@ -29,21 +29,34 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     FilterChain filterChain) throws ServletException, IOException {
 
         String uri = request.getRequestURI();
+        String method = request.getMethod();
         System.out.println("🔥 요청 URI: " + uri);
+        System.out.println("🔥 HTTP Method: " + method);
         System.out.println("🔥 들어온 Authorization 헤더: " + request.getHeader("Authorization"));
 
-        // ✅ WebSocket 요청은 필터에서 제외
-        if (uri.startsWith("/ws/") || uri.startsWith("/info") || uri.startsWith("/sockjs-node") || uri.startsWith("/ws/chat/info")) {
+        // ✅ 1. CORS Preflight 요청(OPTIONS) 무조건 허용
+        if ("OPTIONS".equalsIgnoreCase(method)) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        // 로그인/회원가입/리프레시 요청은 제외
+        // ✅ 2. WebSocket 관련 요청은 필터 제외
+        if (uri.startsWith("/ws")
+                || uri.startsWith("/sockjs")
+                || uri.equals("/info")
+                || uri.contains("/info")
+                || uri.contains("/ws/chat/info")) { // 🔥 추가!
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        // ✅ 3. 인증 필요 없는 API 경로 제외
         if (uri.startsWith("/api/refresh") || uri.startsWith("/api/login") || uri.startsWith("/api/signup")) {
             filterChain.doFilter(request, response);
             return;
         }
 
+        // ✅ 4. JWT 토큰 파싱
         String token = resolveToken(request);
         System.out.println("🔥 추출된 Bearer 토큰: " + token);
 
@@ -77,12 +90,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private String resolveToken(HttpServletRequest request) {
+        // ✅ 1. 헤더에서 추출
         String bearerToken = request.getHeader("Authorization");
         if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
             return bearerToken.substring(7);
         }
 
-        // ✅ WebSocket fallback 대응 - 쿼리 파라미터에서 token 추출
+        // ✅ 2. 쿼리 파라미터에서 추출 (WebSocket fallback)
         String tokenParam = request.getParameter("token");
         if (tokenParam != null && !tokenParam.isBlank()) {
             return tokenParam;
