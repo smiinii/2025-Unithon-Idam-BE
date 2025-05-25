@@ -34,12 +34,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         System.out.println("🔥 HTTP Method: " + method);
         System.out.println("🔥 들어온 Authorization 헤더: " + request.getHeader("Authorization"));
 
-        // ✅ WebSocket & OPTIONS 요청은 무조건 패스
         if ("OPTIONS".equalsIgnoreCase(method) ||
                 uri.startsWith("/ws/") ||
-                uri.contains("/info") ||  // 여기까지는 이미 있음
-                uri.equals("/ws/chat/info") ||  // 🔥 이 줄 추가
-                uri.contains("/sockjs")) {
+                uri.contains("/sockjs") ||
+                uri.contains("/info") || // 이거는 "/ws/chat/info"를 포함하지 않을 수 있음
+                uri.equals("/ws/chat/info") || // 🔥 정확히 이 줄 추가
+                uri.equals("/info")) {
             filterChain.doFilter(request, response);
             return;
         }
