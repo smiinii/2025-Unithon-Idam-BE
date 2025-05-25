@@ -17,9 +17,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/*
-    JWT 사용자 인증 필터
- */
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
@@ -35,6 +32,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         System.out.println("🔥 요청 URI: " + uri);
         System.out.println("🔥 들어온 Authorization 헤더: " + request.getHeader("Authorization"));
 
+        // ✅ WebSocket 요청은 필터에서 제외
+        if (uri.startsWith("/ws/")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        // 로그인/회원가입/리프레시 요청은 제외
         if (uri.startsWith("/api/refresh") || uri.startsWith("/api/login") || uri.startsWith("/api/signup")) {
             filterChain.doFilter(request, response);
             return;
@@ -72,16 +76,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-    /*
-        http 요청 헤더에서 Authorization 값 꺼내옴.
-        -> Bearer로 시작하는 지 확인. -> Bearer 제외 7자(= Token)만 반환.
-        토큰 문자열이 없다면 null 반환.
-    */
     private String resolveToken(HttpServletRequest request) {
         String bearerToken = request.getHeader("Authorization");
         if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
             return bearerToken.substring(7);
         }
+
+        // ✅ WebSocket fallback 대응 - 쿼리 파라미터에서 token 추출
+        String tokenParam = request.getParameter("token");
+        if (tokenParam != null && !tokenParam.isBlank()) {
+            return tokenParam;
+        }
+
         return null;
     }
 }
