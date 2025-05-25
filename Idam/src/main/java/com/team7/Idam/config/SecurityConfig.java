@@ -52,10 +52,8 @@ public class SecurityConfig {
                                 "/api/refresh",
                                 "/api/ai-tag",
                                 "/api/categories/**",
-                                // 🔥 WebSocket 관련 경로들
                                 "/ws/**",
                                 "/ws/chat/**",
-                                "/ws/chat/info",
                                 "/info",
                                 "/sockjs-node/**"
                         ).permitAll()
