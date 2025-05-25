@@ -33,7 +33,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         System.out.println("🔥 들어온 Authorization 헤더: " + request.getHeader("Authorization"));
 
         // ✅ WebSocket 요청은 필터에서 제외
-        if (uri.startsWith("/ws/")) {
+        if (uri.startsWith("/ws/") || uri.startsWith("/info") || uri.startsWith("/sockjs-node")) {
             filterChain.doFilter(request, response);
             return;
         }
