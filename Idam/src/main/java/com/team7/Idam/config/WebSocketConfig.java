@@ -26,9 +26,9 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         // 실제 클라이언트가 연결할 WebSocket 주소
-        registry.addEndpoint("/ws/chat")
+        registry.addEndpoint("/ws")
                 .addInterceptors(jwtHandshakeInterceptor)
-                .setAllowedOriginPatterns("http://localhost:3000") // CORS 허용 (프론트와 포트 다르면 필수)
+                .setAllowedOriginPatterns("*") // CORS 허용 (프론트와 포트 다르면 필수)
                 .withSockJS(); // SockJS: WebSocket을 지원하지 않는 브라우저 대안
     }
 }
