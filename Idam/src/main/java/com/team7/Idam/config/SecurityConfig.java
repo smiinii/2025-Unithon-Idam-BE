@@ -53,7 +53,6 @@ public class SecurityConfig {
                                 "/api/ai-tag",
                                 "/api/categories/**",
                                 "/ws/**",
-                                "/ws/chat/**",
                                 "/info",
                                 "/ws/chat/info",
                                 "/sockjs-node/**"

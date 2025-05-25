@@ -34,18 +34,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         System.out.println("🔥 HTTP Method: " + method);
         System.out.println("🔥 들어온 Authorization 헤더: " + request.getHeader("Authorization"));
 
-        // ✅ 1. CORS Preflight 요청(OPTIONS) 무조건 허용
-        if ("OPTIONS".equalsIgnoreCase(method)) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-
-        // ✅ 2. WebSocket 관련 요청은 필터 제외
-        if (uri.startsWith("/ws")
-                || uri.startsWith("/sockjs")
-                || uri.equals("/info")
-                || uri.contains("/info")
-                || uri.contains("/ws/chat/info")) { // 🔥 추가!
+        // ✅ WebSocket & OPTIONS 요청은 무조건 패스
+        if ("OPTIONS".equalsIgnoreCase(method) ||
+                uri.startsWith("/ws/") ||
+                uri.contains("/info") ||  // 여기까지는 이미 있음
+                uri.equals("/ws/chat/info") ||  // 🔥 이 줄 추가
+                uri.contains("/sockjs")) {
             filterChain.doFilter(request, response);
             return;
         }
