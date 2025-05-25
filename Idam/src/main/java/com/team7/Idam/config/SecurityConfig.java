@@ -55,6 +55,7 @@ public class SecurityConfig {
                                 "/ws/**",
                                 "/ws/chat/**",
                                 "/info",
+                                "/ws/chat/info",
                                 "/sockjs-node/**"
                         ).permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
