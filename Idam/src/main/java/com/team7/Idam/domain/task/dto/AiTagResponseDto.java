@@ -10,5 +10,6 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class AiTagResponseDto {
+    private String domain;
     private List<String> tag;
 }
