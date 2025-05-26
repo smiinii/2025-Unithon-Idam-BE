@@ -52,6 +52,7 @@ public class SecurityConfig {
                                 "/api/refresh",
                                 "/api/ai-tag",
                                 "/api/categories/**",
+                                "/api/matching/by-ai",
                                 "/ws/**",
                                 "/info",
                                 "/ws/chat/info",

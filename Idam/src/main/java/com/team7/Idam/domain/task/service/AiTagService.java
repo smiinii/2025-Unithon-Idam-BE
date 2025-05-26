@@ -5,8 +5,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team7.Idam.domain.task.client.AiTagClient;
 import com.team7.Idam.domain.task.dto.AiTagRequestDto;
 import com.team7.Idam.domain.task.dto.AiTagResultDto;
+import com.team7.Idam.domain.user.entity.enums.UserType;
+import com.team7.Idam.global.util.SecurityUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 import java.util.Set;
@@ -28,7 +31,14 @@ public class AiTagService {
         this.objectMapper = objectMapper;
     }
 
+    public void validateCompanyAccess() {
+        if (SecurityUtil.getCurrentUserType() != UserType.COMPANY) {
+            throw new AccessDeniedException("해당 기능은 기업 회원만 사용할 수 있습니다.");
+        }
+    }
+
     public Mono<List<String>> fetchDeduplicatedTagList(AiTagRequestDto requestDto) {
+        validateCompanyAccess(); // 기업 타입만 실행 가능
         return aiTagClient.getAiTag(requestDto.getDomain(), requestDto.getPrompt())
                 .map(jsonString -> {
                     log.info("🔥 서비스 수신된 Raw JSON: {}", jsonString);

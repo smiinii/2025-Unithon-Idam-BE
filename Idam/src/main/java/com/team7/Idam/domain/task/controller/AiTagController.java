@@ -37,6 +37,7 @@ public class AiTagController {
         return aiTagService.fetchDeduplicatedTagList(requestDto)
                 .map(deduplicatedTags -> {
                     AiTagResponseDto responseDto = AiTagResponseDto.builder()
+                            .domain(requestDto.getDomain())
                             .tag(deduplicatedTags)
                             .build();
 
