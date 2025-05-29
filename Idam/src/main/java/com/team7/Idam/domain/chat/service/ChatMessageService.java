@@ -25,7 +25,11 @@ public class ChatMessageService {
         ChatRoom room = chatRoomRepository.findById(roomId)
                 .orElseThrow(() -> new IllegalArgumentException("채팅방이 존재하지 않습니다."));
 
-        if (!room.getCompany().equals(sender) && !room.getStudent().equals(sender)) {
+        Long senderId = sender.getId();
+        Long companyId = room.getCompany().getId();
+        Long studentId = room.getStudent().getId();
+
+        if (!companyId.equals(senderId) && !studentId.equals(senderId)) {
             throw new SecurityException("채팅방에 참여한 사용자만 메시지를 보낼 수 있습니다.");
         }
 
@@ -45,15 +49,17 @@ public class ChatMessageService {
         ChatRoom room = chatRoomRepository.findById(roomId)
                 .orElseThrow(() -> new IllegalArgumentException("채팅방이 존재하지 않습니다."));
 
-        // 💥 유저가 채팅방의 소속이 아니면 차단
-        if (!room.getCompany().equals(user) && !room.getStudent().equals(user)) {
+        Long userId = user.getId();
+        Long companyId = room.getCompany().getId();
+        Long studentId = room.getStudent().getId();
+
+        if (!companyId.equals(userId) && !studentId.equals(userId)) {
             throw new SecurityException("이 채팅방에 접근할 수 없습니다.");
         }
 
-        // 💥 삭제된 채팅방이라면 차단
         boolean deletedForThisUser =
-                (room.getCompany().equals(user) && room.isDeletedByCompany()) ||
-                        (room.getStudent().equals(user) && room.isDeletedByStudent());
+                (companyId.equals(userId) && room.isDeletedByCompany()) ||
+                        (studentId.equals(userId) && room.isDeletedByStudent());
 
         if (deletedForThisUser) {
             throw new SecurityException("삭제된 채팅방입니다.");
@@ -64,7 +70,6 @@ public class ChatMessageService {
                 .collect(Collectors.toList());
     }
 
-
     // 3. 메시지 읽음 처리
     @Transactional
     public void markMessagesAsRead(Long roomId, User reader) {
@@ -72,7 +77,7 @@ public class ChatMessageService {
                 .orElseThrow(() -> new IllegalArgumentException("채팅방이 존재하지 않습니다."));
 
         chatMessageRepository.findByChatRoomOrderBySentAtAsc(room).stream()
-                .filter(m -> !m.getSender().equals(reader) && !m.isRead())
+                .filter(m -> !m.getSender().getId().equals(reader.getId()) && !m.isRead())
                 .forEach(ChatMessage::markAsRead);
     }
 }

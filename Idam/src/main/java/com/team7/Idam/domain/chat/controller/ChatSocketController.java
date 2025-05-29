@@ -26,6 +26,8 @@ public class ChatSocketController {
     public void send(@Payload ChatMessageSocketDto dto, Principal principal) {
         System.out.println("📩 [WebSocket 수신] 메시지 도착: " + dto);
         System.out.println("🔐 Principal: " + (principal != null ? principal.getName() : "null"));
+        System.out.println("💬 채팅방 ID: " + dto.getRoomId());
+        System.out.println("✉️ 메시지 내용: " + dto.getContent());
 
         if (principal == null) {
             throw new SecurityException("인증되지 않은 사용자입니다. principal이 null입니다.");
