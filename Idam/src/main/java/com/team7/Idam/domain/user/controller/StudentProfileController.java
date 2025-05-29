@@ -18,48 +18,48 @@ public class StudentProfileController {
     private final StudentProfileService studentService;
 
     // 프로필 전체 조회
-    @GetMapping("/{studentId}/profile")
-    public ResponseEntity<ApiResponse<StudentProfileResponseDto>> getStudentProfile(@PathVariable Long studentId) {
-        StudentProfileResponseDto profile = studentService.getStudentProfile(studentId);
+    @GetMapping("/{userId}/profile")
+    public ResponseEntity<ApiResponse<StudentProfileResponseDto>> getStudentProfile(@PathVariable Long userId) {
+        StudentProfileResponseDto profile = studentService.getStudentProfile(userId);
         return ResponseEntity.ok(ApiResponse.success("프로필 조회 성공", profile));
     }
 
     // 프로필 정보 수정
-    @PatchMapping("/{studentId}/profile")
-    public ResponseEntity<ApiResponse<Void>> updateStudentProfile(@PathVariable Long studentId, @RequestBody StudentProfileUpdateRequestDto request) {
-        studentService.updateStudentProfile(studentId, request);
+    @PatchMapping("/{userId}/profile")
+    public ResponseEntity<ApiResponse<Void>> updateStudentProfile(@PathVariable Long userId, @RequestBody StudentProfileUpdateRequestDto request) {
+        studentService.updateStudentProfile(userId, request);
         return ResponseEntity.ok(ApiResponse.success("프로필이 수정되었습니다."));
     }
 
     // 프로필 이미지 추가/수정
-    @PutMapping("/{studentId}/profile/image")
-    public ResponseEntity<ApiResponse<Void>> updateProfileImage(@PathVariable Long studentId, @RequestPart("profileImage") MultipartFile file) {
-        studentService.updateProfileImage(studentId, file);
+    @PutMapping("/{userId}/profile/image")
+    public ResponseEntity<ApiResponse<Void>> updateProfileImage(@PathVariable Long userId, @RequestPart("profileImage") MultipartFile file) {
+        studentService.updateProfileImage(userId, file);
         return ResponseEntity.ok(ApiResponse.success("프로필 이미지가 수정되었습니다."));
     }
 
     // 프로필 이미지 삭제
-    @DeleteMapping("/{studentId}/profile/image")
-    public ResponseEntity<ApiResponse<Void>> deleteProfileImage(@PathVariable Long studentId) {
-        studentService.deleteProfileImage(studentId);
+    @DeleteMapping("/{userId}/profile/image")
+    public ResponseEntity<ApiResponse<Void>> deleteProfileImage(@PathVariable Long userId) {
+        studentService.deleteProfileImage(userId);
         return ResponseEntity.ok(ApiResponse.success("프로필 이미지가 삭제되었습니다."));
     }
 
     // 포트폴리오 추가
-    @PostMapping("/{studentId}/portfolios")
+    @PostMapping("/{userId}/portfolios")
     public ResponseEntity<ApiResponse<Void>> addPortfolio(
-            @PathVariable Long studentId,
+            @PathVariable Long userId,
             @RequestPart(required = false) MultipartFile portfolioFile,
             @RequestPart(required = false) String portfolioUrl) {
 
-        studentService.addPortfolio(studentId, portfolioFile, portfolioUrl);
+        studentService.addPortfolio(userId, portfolioFile, portfolioUrl);
         return ResponseEntity.ok(ApiResponse.success("포트폴리오가 등록되었습니다."));
     }
 
     // 포트폴리오 삭제
-    @DeleteMapping("/{studentId}/portfolios/{portfolioId}")
-    public ResponseEntity<ApiResponse<Void>> deletePortfolio(@PathVariable Long studentId, @PathVariable Long portfolioId) {
-        studentService.deletePortfolio(studentId, portfolioId);
+    @DeleteMapping("/{userId}/portfolios/{portfolioId}")
+    public ResponseEntity<ApiResponse<Void>> deletePortfolio(@PathVariable Long userId, @PathVariable Long portfolioId) {
+        studentService.deletePortfolio(userId, portfolioId);
         return ResponseEntity.ok(ApiResponse.success("포트폴리오가 삭제되었습니다."));
     }
 
