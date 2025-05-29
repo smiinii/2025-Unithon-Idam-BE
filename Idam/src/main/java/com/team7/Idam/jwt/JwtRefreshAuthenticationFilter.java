@@ -6,9 +6,13 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.List;
 
 @RequiredArgsConstructor
 public class JwtRefreshAuthenticationFilter extends OncePerRequestFilter {
@@ -23,8 +27,16 @@ public class JwtRefreshAuthenticationFilter extends OncePerRequestFilter {
         String refreshToken = resolveRefreshToken(request);
 
         if (refreshToken != null && jwtTokenProvider.validateToken(refreshToken)) {
-            // 👉 더 이상 userId 추출 및 SecurityContextHolder 설정하지 않음
-            // refreshToken 검증만 수행
+            Long userId = jwtTokenProvider.getUserIdFromToken(refreshToken);
+
+            UsernamePasswordAuthenticationToken authentication =
+                    new UsernamePasswordAuthenticationToken(
+                            new CustomUserDetails(userId),
+                            null,
+                            List.of(new SimpleGrantedAuthority("ROLE_USER"))
+                    );
+
+            SecurityContextHolder.getContext().setAuthentication(authentication);
         }
 
         filterChain.doFilter(request, response);
@@ -39,5 +51,11 @@ public class JwtRefreshAuthenticationFilter extends OncePerRequestFilter {
             }
         }
         return null;
+    }
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getRequestURI();
+        return !path.equals("/api/logout") && !path.equals("/api/refresh");
     }
 }
