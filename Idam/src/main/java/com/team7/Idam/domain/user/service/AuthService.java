@@ -116,32 +116,53 @@ public class AuthService {
 
     // 로그인
     public LoginResultDto login(LoginRequestDto request) {
+        System.out.println("🔥 요청 이메일: " + request.getEmail());
+        System.out.println("🔥 받은 디바이스 ID: " + request.getDeviceId());
+
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 이메일입니다."));
 
+        System.out.println("🔥 유저 ID: " + user.getId());
+        System.out.println("🔥 유저 타입: " + user.getUserType());
+
         String raw = request.getPassword();
         String encoded;
+
         if (user.getUserType() == UserType.STUDENT) {
             Student student = studentRepository.findById(user.getId())
                     .orElseThrow(() -> new IllegalArgumentException("학생 정보가 존재하지 않습니다."));
             encoded = student.getPassword();
+
+            System.out.println("🔥 학생 비밀번호 해시: " + encoded);
         } else if (user.getUserType() == UserType.COMPANY) {
             Company company = companyRepository.findById(user.getId())
                     .orElseThrow(() -> new IllegalArgumentException("기업 정보가 존재하지 않습니다."));
             encoded = company.getPassword();
+
+            System.out.println("🔥 기업 비밀번호 해시: " + encoded);
         } else {
             throw new IllegalArgumentException("지원하지 않는 사용자 타입입니다.");
         }
 
         if (!passwordEncoder.matches(raw, encoded)) {
+            System.out.println("❌ 비밀번호가 일치하지 않음");
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
         }
 
-        List<String> roles = List.of("USER");  // USER
+        System.out.println("✅ 비밀번호 일치");
+
+        List<String> roles = List.of("USER");  // 또는 필요 시 조건 처리
         // List<String> roles = List.of("ADMIN");  // ADMIN -> 이건 따로 어드민 만들때 사용(학생, 기업 외 어드민 로그인 장치 마련)
         String accessToken = jwtTokenProvider.generateAccessToken(user.getId(), user.getUserType().name(), roles);
         String refreshToken = jwtTokenProvider.generateRefreshToken();
+
+        System.out.println("✅ accessToken 생성 완료");
+        System.out.println("✅ refreshToken 생성 완료");
+
         refreshTokenStore.save(user.getId(), request.getDeviceId(), refreshToken);
+        System.out.println("✅ refreshToken 저장 완료");
+
+        System.out.println("🔥 최종 반환할 userId: " + user.getId());
 
         return new LoginResultDto(accessToken, refreshToken, user.getUserType().name(), user.getId());
     }
