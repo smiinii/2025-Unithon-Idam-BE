@@ -10,5 +10,6 @@ import lombok.Setter;
 public class ScoredStudentResponseDto {
     private Long userId;
     private String name;
+    private String profileImage;
     private int score;
 }
