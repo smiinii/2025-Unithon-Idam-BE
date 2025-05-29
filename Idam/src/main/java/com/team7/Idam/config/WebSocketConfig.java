@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.web.socket.config.annotation.*;
+import com.team7.Idam.jwt.CustomHandshakeHandler;
 
 @Configuration
 @EnableWebSocketMessageBroker
@@ -12,6 +13,7 @@ import org.springframework.web.socket.config.annotation.*;
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     private final JwtHandshakeInterceptor jwtHandshakeInterceptor;
+    private final CustomHandshakeHandler customHandshakeHandler;
 
     // 1. 메시지 브로커 설정 (구독/sub, 발행/pub 구분)
     @Override
@@ -28,6 +30,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         // 실제 클라이언트가 연결할 WebSocket 주소
         registry.addEndpoint("/ws/chat")
                 .addInterceptors(jwtHandshakeInterceptor)
+                .setHandshakeHandler(customHandshakeHandler)
                 .setAllowedOriginPatterns("*") // CORS 허용 (프론트와 포트 다르면 필수)
                 .withSockJS(); // SockJS: WebSocket을 지원하지 않는 브라우저 대안
     }
