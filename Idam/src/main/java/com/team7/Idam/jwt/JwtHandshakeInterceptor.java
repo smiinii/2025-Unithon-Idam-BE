@@ -33,6 +33,10 @@ public class JwtHandshakeInterceptor implements HandshakeInterceptor {
                 if (jwtTokenProvider.validateToken(token)) {
                     Long userId = jwtTokenProvider.getUserIdFromToken(token);
                     attributes.put("userId", userId);
+
+                    // ✅ Principal 설정
+                    attributes.put("principal", new StompPrincipal(userId.toString()));
+
                     System.out.println("✅ WebSocket 인증 성공, userId: " + userId);
                     return true;
                 } else {
