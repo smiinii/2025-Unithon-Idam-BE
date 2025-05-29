@@ -18,7 +18,7 @@ public class AiTagClient {
 
     public AiTagClient() {
         this.webClient = WebClient.builder()
-                .baseUrl("https://d65b-117-16-195-75.ngrok-free.app") // 정확한 ngrok 주소
+                .baseUrl("https://b173-117-16-195-75.ngrok-free.app") // 정확한 ngrok 주소
                 .build();
     }
 
