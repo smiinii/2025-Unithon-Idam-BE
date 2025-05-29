@@ -96,6 +96,12 @@ public class SecurityConfig {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
+                registry.addMapping("/api/**")
+                        .allowedOrigins("http://localhost:3000")
+                        .allowedMethods("*")
+                        .allowedHeaders("*")
+                        .allowCredentials(true);
+
                 registry.addMapping("/ws/**")
                         .allowedOrigins("http://localhost:3000")
                         .allowedMethods("*")
