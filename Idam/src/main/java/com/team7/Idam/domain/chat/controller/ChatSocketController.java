@@ -24,13 +24,28 @@ public class ChatSocketController {
     // /pub/chat/send로 메시지가 전송되면 실행
     @MessageMapping("/chat/send")
     public void send(@Payload ChatMessageSocketDto dto, Principal principal) {
-        // ⚠️ 보안 핵심: senderId는 클라이언트에서 보내지 않고, 서버에서 꺼낸다.
-        Long senderId = Long.valueOf(principal.getName());
+        System.out.println("📩 [WebSocket 수신] 메시지 도착: " + dto);
+        System.out.println("🔐 Principal: " + (principal != null ? principal.getName() : "null"));
+
+        if (principal == null) {
+            throw new SecurityException("인증되지 않은 사용자입니다. principal이 null입니다.");
+        }
+
+        Long senderId;
+        try {
+            senderId = Long.valueOf(principal.getName());
+        } catch (NumberFormatException e) {
+            throw new SecurityException("principal name이 숫자가 아님: " + principal.getName());
+        }
+
+        System.out.println("✅ 인증된 senderId: " + senderId);
 
         User sender = userService.getUserById(senderId);
+        System.out.println("👤 유저 정보: " + sender.getEmail() + " / " + sender.getUserType());
+
         ChatMessageResponseDto savedMessage = chatMessageService.sendMessage(dto.getRoomId(), sender, dto.getContent());
 
         messagingTemplate.convertAndSend("/sub/chat/room/" + dto.getRoomId(), savedMessage);
+        System.out.println("📤 메시지 전송 완료 → /sub/chat/room/" + dto.getRoomId());
     }
-
 }
