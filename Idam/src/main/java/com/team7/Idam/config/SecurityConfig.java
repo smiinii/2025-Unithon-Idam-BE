@@ -4,6 +4,7 @@ import com.team7.Idam.domain.user.repository.UserRepository;
 import com.team7.Idam.jwt.JwtRefreshAuthenticationFilter;
 import com.team7.Idam.jwt.JwtTokenProvider;
 import com.team7.Idam.jwt.JwtAuthenticationFilter;
+import org.springframework.http.HttpMethod;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -46,6 +47,7 @@ public class SecurityConfig {
         return http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // ✅ 이 한 줄 추가!
                         .requestMatchers(
                                 "/api/signup/**",
                                 "/api/login",
