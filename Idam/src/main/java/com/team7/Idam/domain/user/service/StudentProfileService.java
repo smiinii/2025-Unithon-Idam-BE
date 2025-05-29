@@ -19,6 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -46,6 +47,10 @@ public class StudentProfileService {
         Student student = studentRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 학생을 찾을 수 없습니다."));
 
+        List<String> tags = student.getTags().stream()
+                .map(TagOption::getTagName)
+                .collect(Collectors.toList());
+
         return StudentProfileResponseDto.builder()
                 .name(student.getName())
                 .schoolName(student.getSchoolName())
@@ -57,6 +62,7 @@ public class StudentProfileService {
                 .email(student.getUser().getEmail())
                 .phone(student.getUser().getPhone())
                 .categoryId(student.getCategory().getId())
+                .tags(tags)
                 .build();
     }
 

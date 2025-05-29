@@ -4,6 +4,8 @@ import com.team7.Idam.domain.user.entity.enums.Gender;
 import lombok.Builder;
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 @Builder
 public class StudentProfileResponseDto {
@@ -17,4 +19,5 @@ public class StudentProfileResponseDto {
     private String email;
     private String phone;
     private Long categoryId;
+    private List<String> tags;
 }
