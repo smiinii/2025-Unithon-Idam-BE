@@ -16,25 +16,33 @@ public class CustomUserDetails implements UserDetails {
     private final String email;
     private final UserType userType;
 
+    // ✅ 전체 정보가 필요한 경우 (기존 생성자)
     public CustomUserDetails(User user) {
         this.id = user.getId();
         this.email = user.getEmail();
         this.userType = user.getUserType();
     }
 
+    // ✅ userId만 필요한 경우 (로그아웃/refresh용)
+    public CustomUserDetails(Long id) {
+        this.id = id;
+        this.email = null;
+        this.userType = UserType.STUDENT; // or null (안 쓰면 의미 없음)
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(() -> userType.name()); // ROLE_STUDENT, ROLE_COMPANY 같은 문자열
+        return List.of(() -> userType != null ? userType.name() : "ROLE_USER");
     }
 
     @Override
     public String getUsername() {
-        return email;  // 로그인 시 아이디로 사용할 값
+        return email;
     }
 
     @Override
     public String getPassword() {
-        return null; // JWT 기반 인증이므로 null 반환
+        return null;
     }
 
     @Override
