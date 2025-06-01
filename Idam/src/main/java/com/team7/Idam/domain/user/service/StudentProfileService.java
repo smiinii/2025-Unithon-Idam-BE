@@ -1,5 +1,6 @@
 package com.team7.Idam.domain.user.service;
 
+import com.team7.Idam.domain.user.dto.profile.PortfolioResponseDto;
 import com.team7.Idam.domain.user.dto.profile.StudentProfileResponseDto;
 import com.team7.Idam.domain.user.dto.profile.StudentProfileUpdateRequestDto;
 import com.team7.Idam.domain.user.dto.profile.UpdateTagsRequestDto;
@@ -47,9 +48,15 @@ public class StudentProfileService {
         Student student = studentRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 학생을 찾을 수 없습니다."));
 
+        // 태그 리스트
         List<String> tags = student.getTags().stream()
                 .map(TagOption::getTagName)
                 .collect(Collectors.toList());
+
+        // 포트폴리오 리스트
+        List<PortfolioResponseDto> portfolios = student.getPortfolios().stream()
+                .map(p -> new PortfolioResponseDto(p.getPortfolioId(), p.getPortfolio()))
+                .toList();
 
         return StudentProfileResponseDto.builder()
                 .name(student.getName())
@@ -63,6 +70,7 @@ public class StudentProfileService {
                 .phone(student.getUser().getPhone())
                 .categoryId(student.getCategory().getId())
                 .tags(tags)
+                .portfolios(portfolios)
                 .build();
     }
 

@@ -20,4 +20,5 @@ public class StudentProfileResponseDto {
     private String phone;
     private Long categoryId;
     private List<String> tags;
+    private List<PortfolioResponseDto> portfolios;
 }
