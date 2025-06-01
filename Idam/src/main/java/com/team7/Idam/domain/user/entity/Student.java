@@ -4,7 +4,9 @@ import com.team7.Idam.domain.user.entity.enums.Gender;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -76,4 +78,7 @@ public class Student {
         this.tags.addAll(tags);   // 새 태그 추가
     }
 
+    // 포트폴리오
+    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Portfolio> portfolios = new ArrayList<>();
 }
