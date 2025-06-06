@@ -99,13 +99,19 @@ public class SecurityConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/api/**")
-                        .allowedOrigins("http://localhost:3000")
+                        .allowedOrigins(
+                                "http://localhost:3000",
+                                "https://idam.vercel.app"   // ✅ 추가
+                        )
                         .allowedMethods("*")
                         .allowedHeaders("*")
                         .allowCredentials(true);
 
                 registry.addMapping("/ws/**")
-                        .allowedOrigins("http://localhost:3000")
+                        .allowedOrigins(
+                                "http://localhost:3000",
+                                "https://idam.vercel.app"   // ✅ 추가
+                        )
                         .allowedMethods("*")
                         .allowedHeaders("*")
                         .allowCredentials(true);
