@@ -43,7 +43,6 @@ public class StudentProfileService {
         학생 프로필 전체 조회
      */
     public StudentProfileResponseDto getStudentProfile(Long userId) {
-        validateStudentAccess(userId);
 
         Student student = studentRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 학생을 찾을 수 없습니다."));
