@@ -1,5 +1,6 @@
 package com.team7.Idam.domain.user.controller;
 
+import com.team7.Idam.domain.user.dto.profile.StudentPreviewResponseDto;
 import com.team7.Idam.domain.user.dto.profile.StudentProfileResponseDto;
 import com.team7.Idam.domain.user.dto.profile.StudentProfileUpdateRequestDto;
 import com.team7.Idam.domain.user.dto.profile.UpdateTagsRequestDto;
@@ -9,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/students")
@@ -74,5 +77,11 @@ public class StudentProfileController {
         return ResponseEntity.ok(ApiResponse.success("태그가 수정되었습니다."));
     }
 
-
+    // 모든 학생 조회
+    @GetMapping("/preview")
+    public ResponseEntity<ApiResponse<List<StudentPreviewResponseDto>>> getAllStudents() {
+        return ResponseEntity.ok(
+                ApiResponse.success("모든 학생 조회 성공", studentService.getAllStudents())
+        );
+    }
 }
