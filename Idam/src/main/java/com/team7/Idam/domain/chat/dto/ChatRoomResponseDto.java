@@ -18,6 +18,7 @@ public class ChatRoomResponseDto {
     private String opponentProfileImage;
     private String lastMessage;
     private LocalDateTime lastMessageAt;
+    private String projectTitle;
 
     public static ChatRoomResponseDto from(ChatRoom room, User currentUser) {
         User opponent = room.getCompany().equals(currentUser)
@@ -43,6 +44,7 @@ public class ChatRoomResponseDto {
                 .opponentProfileImage(opponentProfileImage)
                 .lastMessage(room.getLastMessage())
                 .lastMessageAt(room.getLastMessageAt())
+                .projectTitle(room.getProjectTitle())
                 .build();
     }
 }

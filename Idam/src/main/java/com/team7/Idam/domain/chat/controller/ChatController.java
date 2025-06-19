@@ -1,6 +1,7 @@
 package com.team7.Idam.domain.chat.controller;
 
 import com.team7.Idam.domain.chat.dto.ChatMessageResponseDto;
+import com.team7.Idam.domain.chat.dto.ChatRoomRequestDto;
 import com.team7.Idam.domain.chat.dto.ChatRoomResponseDto;
 import com.team7.Idam.domain.chat.dto.SendMessageRequestDto;
 import com.team7.Idam.domain.chat.service.ChatMessageService;
@@ -28,12 +29,13 @@ public class ChatController {
     @PostMapping("/room")
     public ResponseEntity<ChatRoomResponseDto> createRoom(
             @RequestParam Long targetUserId,
-            @AuthenticationPrincipal CustomUserDetails userDetails
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestBody ChatRoomRequestDto request
     ) {
         User managedCompany = userService.getUserById(userDetails.getId());
         User managedStudent = userService.getUserById(targetUserId);
         System.out.println(">> 로그인한 유저 ID: " + managedCompany.getId());
-        return ResponseEntity.ok(chatRoomService.createRoom(managedCompany, managedStudent));
+        return ResponseEntity.ok(chatRoomService.createRoom(managedCompany, managedStudent, request));
     }
 
     // 채팅방 목록 조회 (기업)
