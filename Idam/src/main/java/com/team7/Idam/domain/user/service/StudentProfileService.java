@@ -222,7 +222,7 @@ public class StudentProfileService {
         List<Student> allStudents = studentRepository.findAll();
         Collections.shuffle(allStudents); // 랜덤 섞기
         return allStudents.stream()
-                .limit(3)
+                .limit(4)
                 .map(StudentPreviewResponseDto::from)
                 .collect(Collectors.toList());
     }
