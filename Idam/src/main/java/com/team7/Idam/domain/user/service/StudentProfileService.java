@@ -1,9 +1,6 @@
 package com.team7.Idam.domain.user.service;
 
-import com.team7.Idam.domain.user.dto.profile.PortfolioResponseDto;
-import com.team7.Idam.domain.user.dto.profile.StudentProfileResponseDto;
-import com.team7.Idam.domain.user.dto.profile.StudentProfileUpdateRequestDto;
-import com.team7.Idam.domain.user.dto.profile.UpdateTagsRequestDto;
+import com.team7.Idam.domain.user.dto.profile.*;
 import com.team7.Idam.domain.user.entity.Portfolio;
 import com.team7.Idam.domain.user.entity.Student;
 import com.team7.Idam.domain.user.entity.TagOption;
@@ -18,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -215,5 +213,17 @@ public class StudentProfileService {
 
         student.setTags(new HashSet<>(tags));
         studentRepository.save(student);
+    }
+
+    /*
+        메인 화면 Preview용 모든 학생 조회 (랜덤 3명)
+     */
+    public List<StudentPreviewResponseDto> getAllStudents() {
+        List<Student> allStudents = studentRepository.findAll();
+        Collections.shuffle(allStudents); // 랜덤 섞기
+        return allStudents.stream()
+                .limit(3)
+                .map(StudentPreviewResponseDto::from)
+                .collect(Collectors.toList());
     }
 }

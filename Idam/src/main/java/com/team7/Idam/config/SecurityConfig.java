@@ -58,7 +58,8 @@ public class SecurityConfig {
                                 "/ws/**",
                                 "/info",
                                 "/ws/chat/info",
-                                "/sockjs-node/**"
+                                "/sockjs-node/**",
+                                "/api/students/preview"
                         ).permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/**").hasAnyRole("USER", "ADMIN")
