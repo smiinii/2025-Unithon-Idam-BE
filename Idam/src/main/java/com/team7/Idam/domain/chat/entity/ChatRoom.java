@@ -66,4 +66,7 @@ public class ChatRoom {
     public void deleteByStudent() {
         this.isDeletedByStudent = true;
     }
+
+    @Column(name = "project_title", length = 100, nullable = false)
+    private String projectTitle;
 }

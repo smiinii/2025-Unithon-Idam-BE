@@ -54,7 +54,6 @@ public class UserDataInitializer implements CommandLineRunner {
                             .major("정보통신공학과")
                             .schoolId("2023" + String.format("%05d", i))
                             .password("student1234")
-                            .profileImage("default-student.jpg")
                             .gender((i % 2 == 0) ? Gender.FEMALE : Gender.MALE)
                             .category(itCategory)
                             .build()
@@ -105,7 +104,6 @@ public class UserDataInitializer implements CommandLineRunner {
                             .companyName("기업사" + i)
                             .address("서울시 강남구 테헤란로 " + (10 + i))
                             .website("https://company" + i + ".example.com")
-                            .profileImage("default-company.jpg")
                             .build()
             );
         }
