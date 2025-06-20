@@ -5,6 +5,7 @@ import com.team7.Idam.domain.chat.entity.ChatMessage;
 import com.team7.Idam.domain.chat.entity.ChatRoom;
 import com.team7.Idam.domain.chat.repository.ChatMessageRepository;
 import com.team7.Idam.domain.chat.repository.ChatRoomRepository;
+import com.team7.Idam.domain.notification.service.NotificationService;
 import com.team7.Idam.domain.user.entity.User;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,7 @@ public class ChatMessageService {
 
     private final ChatRoomRepository chatRoomRepository;
     private final ChatMessageRepository chatMessageRepository;
+    private final NotificationService notificationService;
 
     // 1. 메시지 전송 (DTO 반환)
     public ChatMessageResponseDto sendMessage(Long roomId, User sender, String content) {
@@ -42,6 +44,13 @@ public class ChatMessageService {
         // 마지막 메시지 업데이트
         room.updateLastMessage(content);
         ChatMessage savedMessage = chatMessageRepository.save(message);
+
+        User receiver = sender.getId().equals(companyId)
+                ? room.getStudent()
+                : room.getCompany();
+
+        notificationService.createNotification(receiver, room, content);
+
         return ChatMessageResponseDto.from(savedMessage);
     }
 
