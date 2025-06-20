@@ -25,6 +25,5 @@ public class AiTagResultDto {
     @Builder.Default
     private Map<String, List<String>> frameworks = new HashMap<>();
 
-    @Builder.Default
-    private Map<String, List<String>> tools = new HashMap<>();
+    private Object tools;
 }

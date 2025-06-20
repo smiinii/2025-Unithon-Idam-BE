@@ -12,11 +12,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
-import java.util.Set;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
+
+import java.util.*;
 
 @Service
 public class AiTagService {
@@ -48,45 +45,69 @@ public class AiTagService {
                                 new TypeReference<List<AiTagResultDto>>() {}
                         );
 
-                        // ✅ 중복 제거용 Set
                         Set<String> tagSet = new HashSet<>();
+
                         for (AiTagResultDto dto : resultList) {
                             if (dto == null) continue;
 
-                            if (dto.getDomain() != null) tagSet.add(dto.getDomain().trim());
-                            if (dto.getRole() != null) tagSet.add(dto.getRole().trim());
+                            String domain = requestDto.getDomain();
 
-                            if (dto.getLanguages() != null) {
-                                dto.getLanguages().stream()
-                                        .filter(Objects::nonNull)
-                                        .map(String::trim)
-                                        .forEach(tagSet::add);
-                            }
+                            if ("IT·프로그래밍".equals(domain)) {
+                                if (dto.getDomain() != null) tagSet.add(dto.getDomain().trim());
+                                if (dto.getRole() != null) tagSet.add(dto.getRole().trim());
 
-                            if (dto.getFrameworks() != null) {
-                                dto.getFrameworks().values().forEach(list -> list.stream()
-                                        .filter(Objects::nonNull)
-                                        .map(String::trim)
-                                        .forEach(tagSet::add));
-                            }
+                                if (dto.getLanguages() != null) {
+                                    dto.getLanguages().stream()
+                                            .filter(Objects::nonNull)
+                                            .map(String::trim)
+                                            .forEach(tagSet::add);
+                                }
 
-                            if (dto.getTools() != null) {
-                                dto.getTools().values().forEach(list -> list.stream()
-                                        .filter(Objects::nonNull)
-                                        .map(String::trim)
-                                        .forEach(tagSet::add));
+                                if (dto.getFrameworks() != null) {
+                                    dto.getFrameworks().values().forEach(list -> list.stream()
+                                            .filter(Objects::nonNull)
+                                            .map(String::trim)
+                                            .forEach(tagSet::add));
+                                }
+
+                                extractToolTags(dto.getTools(), tagSet);
+
+                            } else if ("디자인".equals(domain) || "마케팅".equals(domain)) {
+                                extractToolTags(dto.getTools(), tagSet);
+                            } else {
+                                log.warn("알 수 없는 도메인: {}", domain);
                             }
                         }
 
                         List<String> deduplicatedTags = new ArrayList<>(tagSet);
                         log.info("🔥 최종 deduplicated 태그: {}", deduplicatedTags);
-
                         return deduplicatedTags;
 
                     } catch (Exception e) {
-                        log.error("🔥 서비스 JSON 파싱 실패", e);
+                        log.error("🔥 JSON 파싱 실패", e);
                         throw new RuntimeException("서비스 JSON 파싱 실패", e);
                     }
                 });
+    }
+
+    // 도메인에 따라 tools를 유연하게 파싱
+    private void extractToolTags(Object tools, Set<String> tagSet) {
+        if (tools instanceof Map<?, ?> toolMap) {
+            toolMap.values().forEach(list -> {
+                if (list instanceof List<?> subList) {
+                    subList.stream()
+                            .filter(Objects::nonNull)
+                            .map(Object::toString)
+                            .map(String::trim)
+                            .forEach(tagSet::add);
+                }
+            });
+        } else if (tools instanceof List<?> toolList) {
+            toolList.stream()
+                    .filter(Objects::nonNull)
+                    .map(Object::toString)
+                    .map(String::trim)
+                    .forEach(tagSet::add);
+        }
     }
 }
