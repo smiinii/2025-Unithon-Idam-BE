@@ -42,11 +42,12 @@ public class JwtTokenProvider {
     }
 
     // RefreshToken 발급
-    public String generateRefreshToken() {
+    public String generateRefreshToken(Long userId) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + refreshTokenExpirationMillis);
 
         return Jwts.builder()
+                .setSubject(String.valueOf(userId))
                 .setIssuedAt(now)
                 .setExpiration(expiryDate)
                 .signWith(secretKey, SignatureAlgorithm.HS256)

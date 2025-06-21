@@ -154,7 +154,7 @@ public class AuthService {
         List<String> roles = List.of("USER");  // 또는 필요 시 조건 처리
         // List<String> roles = List.of("ADMIN");  // ADMIN -> 이건 따로 어드민 만들때 사용(학생, 기업 외 어드민 로그인 장치 마련)
         String accessToken = jwtTokenProvider.generateAccessToken(user.getId(), user.getUserType().name(), roles);
-        String refreshToken = jwtTokenProvider.generateRefreshToken();
+        String refreshToken = jwtTokenProvider.generateRefreshToken(user.getId());
 
         System.out.println("✅ accessToken 생성 완료");
         System.out.println("✅ refreshToken 생성 완료");
@@ -187,7 +187,7 @@ public class AuthService {
                 : List.of("ADMIN");
         String newAccessToken = jwtTokenProvider.generateAccessToken(user.getId(), user.getUserType().name(), roles);
 
-        String newRefreshToken = jwtTokenProvider.generateRefreshToken();
+        String newRefreshToken = jwtTokenProvider.generateRefreshToken(user.getId());
         refreshTokenStore.save(user.getId(), deviceId, newRefreshToken);
 
         return new LoginResultDto(newAccessToken, newRefreshToken, user.getUserType().name(), user.getId());
