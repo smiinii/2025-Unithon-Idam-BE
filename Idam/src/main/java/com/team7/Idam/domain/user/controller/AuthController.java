@@ -85,11 +85,19 @@ public class AuthController {
     // Refresh Token을 쿠키에 저장 (로그인, 재발급 시 사용)
     private void addRefreshTokenToCookie(HttpServletResponse response, String refreshToken) {
         Cookie cookie = new Cookie("refreshToken", refreshToken);
-        cookie.setHttpOnly(true);          // 자바스크립트 접근 금지
-        cookie.setSecure(true);             // HTTPS에서만 전송
-        cookie.setPath("/");                // 모든 경로에서 사용
-        cookie.setMaxAge(60 * 60 * 24 * 7);  // 7일 (단위: 초)
+        cookie.setHttpOnly(true);                 // 자바스크립트 접근 금지
+        cookie.setSecure(true);                  // HTTPS에서만 전송
+        cookie.setPath("/");                     // 모든 경로에서 사용
+        cookie.setMaxAge(60 * 60 * 24 * 7);      // 7일 (단위: 초)
         response.addCookie(cookie);
+
+        // ✅ SameSite=None 추가로 붙여주기
+        // 쿠키 문자열을 다시 덮어쓰기 하되, 원래의 쿠키 설정을 참고하여 맞춰줘야 함
+        String setCookieHeader = String.format(
+                "refreshToken=%s; Max-Age=%d; Path=/; Secure; HttpOnly; SameSite=None",
+                refreshToken, 60 * 60 * 24 * 7
+        );
+        response.setHeader("Set-Cookie", setCookieHeader); // 덮어쓰기 방식
     }
 
     // 쿠키에서 Refresh Token 꺼내기 (재발급 시 사용)
