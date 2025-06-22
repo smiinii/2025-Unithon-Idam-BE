@@ -118,10 +118,41 @@ public class AuthController {
 
     // Refresh Token으로 Access Token 재발급
     @PostMapping("/api/refresh")
-    public ResponseEntity<RefreshTokenResponseDto> reissueToken(@RequestParam Long userId, @RequestParam String deviceId, HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<RefreshTokenResponseDto> reissueToken(
+            @RequestParam Long userId,
+            @RequestParam String deviceId,
+            HttpServletRequest request,
+            HttpServletResponse response) {
+
+        // 🔍 들어온 요청 로그 확인
+        System.out.println("🔥 /api/refresh 요청 도착");
+        System.out.println("🔥 Request Method: " + request.getMethod());
+        System.out.println("🔥 Request URI: " + request.getRequestURI());
+        System.out.println("🔥 userId 파라미터: " + userId);
+        System.out.println("🔥 deviceId 파라미터: " + deviceId);
+
+        // 🔍 요청 헤더 전체 출력
+        System.out.println("🔥 요청 헤더 목록:");
+        request.getHeaderNames().asIterator().forEachRemaining(headerName -> {
+            System.out.println("  ↪ " + headerName + ": " + request.getHeader(headerName));
+        });
+
+        // 🔍 요청 쿠키 출력
+        System.out.println("🔥 요청 쿠키 목록:");
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                System.out.println("  🍪 " + cookie.getName() + "=" + cookie.getValue());
+            }
+        } else {
+            System.out.println("  ❌ 쿠키 없음");
+        }
+
+        // 🔧 기존 재발급 로직
         String refreshToken = extractRefreshTokenFromCookie(request);
         LoginResultDto newTokens = authService.reissueToken(userId, deviceId, refreshToken);
         addRefreshTokenToCookie(response, newTokens.getRefreshToken());
+
         return ResponseEntity.ok(new RefreshTokenResponseDto(newTokens.getAccessToken()));
     }
 }
