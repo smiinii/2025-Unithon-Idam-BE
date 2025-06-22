@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -216,14 +217,27 @@ public class StudentProfileService {
     }
 
     /*
-        메인 화면 Preview용 모든 학생 조회 (랜덤 3명)
+        메인 화면 Preview용 모든 학생 조회 (카테고리 별 랜덤 4명)
      */
     public List<StudentPreviewResponseDto> getAllStudents() {
         List<Student> allStudents = studentRepository.findAll();
-        Collections.shuffle(allStudents); // 랜덤 섞기
-        return allStudents.stream()
-                .limit(4)
-                .map(StudentPreviewResponseDto::from)
-                .collect(Collectors.toList());
+        Collections.shuffle(allStudents); // 전체를 섞은 뒤 카테고리별로 추출
+
+        List<StudentPreviewResponseDto> result = new ArrayList<>();
+
+        // 각 카테고리에서 4명씩 추출
+        for (long categoryId = 1; categoryId <= 3; categoryId++) {
+            final long cid = categoryId;  // 람다용 임시 final 변수
+
+            List<StudentPreviewResponseDto> selected = allStudents.stream()
+                    .filter(student -> student.getCategory().getId().equals(cid))
+                    .limit(4)
+                    .map(StudentPreviewResponseDto::from)
+                    .collect(Collectors.toList());
+
+            result.addAll(selected);
+        }
+
+        return result;
     }
 }

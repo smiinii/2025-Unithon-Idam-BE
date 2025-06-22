@@ -77,7 +77,7 @@ public class StudentProfileController {
         return ResponseEntity.ok(ApiResponse.success("태그가 수정되었습니다."));
     }
 
-    // 모든 학생 조회
+    // 메인 화면 Preview용 모든 학생 조회
     @GetMapping("/preview")
     public ResponseEntity<ApiResponse<List<StudentPreviewResponseDto>>> getAllStudents() {
         return ResponseEntity.ok(
