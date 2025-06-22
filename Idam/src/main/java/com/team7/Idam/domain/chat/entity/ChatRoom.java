@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 @Entity
 @Table(name = "chat_room")
@@ -50,13 +51,13 @@ public class ChatRoom {
 
     @PrePersist
     public void prePersist() {
-        this.createdAt = LocalDateTime.now();
+        this.createdAt = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
     }
 
     // 마지막 메시지 갱신
     public void updateLastMessage(String message) {
         this.lastMessage = message;
-        this.lastMessageAt = LocalDateTime.now();
+        this.lastMessageAt = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
     }
 
     public void deleteByCompany() {
