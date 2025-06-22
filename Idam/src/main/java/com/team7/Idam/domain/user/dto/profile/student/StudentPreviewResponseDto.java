@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class StudentPreviewResponseDto {
     private Long userId;
-    private String name;
+    private String nickname;
     private String profileImage;
     private List<String> tags;
     private Long categoryId;
@@ -25,7 +25,7 @@ public class StudentPreviewResponseDto {
     public static StudentPreviewResponseDto from(Student student) {
         return new StudentPreviewResponseDto(
                 student.getId(),
-                student.getName(),
+                student.getNickname(),
                 student.getProfileImage(),
                 student.getTags().stream()
                         .map(TagOption::getTagName)

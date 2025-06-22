@@ -9,7 +9,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class ScoredStudentResponseDto {
     private Long userId;
-    private String name;
+    private String nickname;
     private String profileImage;
     private int score;
 }
