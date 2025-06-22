@@ -1,9 +1,9 @@
 package com.team7.Idam.domain.user.controller;
 
-import com.team7.Idam.domain.user.dto.profile.StudentPreviewResponseDto;
-import com.team7.Idam.domain.user.dto.profile.StudentProfileResponseDto;
-import com.team7.Idam.domain.user.dto.profile.StudentProfileUpdateRequestDto;
-import com.team7.Idam.domain.user.dto.profile.UpdateTagsRequestDto;
+import com.team7.Idam.domain.user.dto.profile.student.StudentPreviewResponseDto;
+import com.team7.Idam.domain.user.dto.profile.student.StudentProfileResponseDto;
+import com.team7.Idam.domain.user.dto.profile.student.StudentProfileUpdateRequestDto;
+import com.team7.Idam.domain.user.dto.profile.student.UpdateTagsRequestDto;
 import com.team7.Idam.domain.user.service.StudentProfileService;
 import com.team7.Idam.global.dto.ApiResponse;
 import lombok.RequiredArgsConstructor;

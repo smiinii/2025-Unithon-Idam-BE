@@ -7,7 +7,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "tag_option")
+@Table(
+        name = "tag_option",
+        uniqueConstraints = @UniqueConstraint(columnNames = {"tag_name", "category_id"})
+)
 @Getter
 @Setter
 @NoArgsConstructor

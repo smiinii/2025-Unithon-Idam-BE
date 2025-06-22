@@ -1,6 +1,7 @@
 package com.team7.Idam.domain.user.controller;
 
-import com.team7.Idam.domain.user.dto.profile.CompanyProfileResponseDto;
+import com.team7.Idam.domain.user.dto.profile.company.CompanyProfileResponseDto;
+import com.team7.Idam.domain.user.dto.profile.company.CompanyProfileUpdateRequestDto;
 import com.team7.Idam.domain.user.service.CompanyProfileService;
 import com.team7.Idam.global.dto.ApiResponse;
 import lombok.RequiredArgsConstructor;
@@ -35,4 +36,12 @@ public class CompanyProfileController {
         companyService.deleteProfileImage(userId);
         return ResponseEntity.ok(ApiResponse.success("프로필 이미지가 삭제되었습니다."));
     }
+
+    // 프로필 정보 수정
+    @PatchMapping("/{userId}/profile")
+    public ResponseEntity<ApiResponse<Void>> updateCompanyProfile(@PathVariable Long userId, @RequestBody CompanyProfileUpdateRequestDto request) {
+        companyService.updateCompanyProfile(userId, request);
+        return ResponseEntity.ok(ApiResponse.success("프로필이 수정되었습니다."));
+    }
+
 }

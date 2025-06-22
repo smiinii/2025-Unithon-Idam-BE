@@ -110,6 +110,7 @@ public class AuthService {
                 .address(request.getAddress())
                 .website(request.getWebsite())
                 .profileImage(request.getProfileImage())
+                .companyDescription("기업 소개가 없습니다.")
                 .build();
         companyRepository.save(company);
     }

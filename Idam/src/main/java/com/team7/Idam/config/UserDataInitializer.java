@@ -108,6 +108,7 @@ public class UserDataInitializer implements CommandLineRunner {
                             .companyName("기업사" + i)
                             .address("서울시 강남구 테헤란로 " + (10 + i))
                             .website("https://company" + i + ".example.com")
+                            .companyDescription("기업 소개가 없습니다.")
                             .build()
             );
         }

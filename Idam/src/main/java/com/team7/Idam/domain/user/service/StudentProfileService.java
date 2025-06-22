@@ -1,6 +1,6 @@
 package com.team7.Idam.domain.user.service;
 
-import com.team7.Idam.domain.user.dto.profile.*;
+import com.team7.Idam.domain.user.dto.profile.student.*;
 import com.team7.Idam.domain.user.entity.Portfolio;
 import com.team7.Idam.domain.user.entity.Student;
 import com.team7.Idam.domain.user.entity.TagOption;

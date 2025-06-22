@@ -1,4 +1,4 @@
-package com.team7.Idam.domain.user.dto.profile;
+package com.team7.Idam.domain.user.dto.profile.student;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
