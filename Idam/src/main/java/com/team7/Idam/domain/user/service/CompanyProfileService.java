@@ -1,5 +1,6 @@
 package com.team7.Idam.domain.user.service;
 
+import com.team7.Idam.domain.user.dto.profile.company.CompanyPreviewResponseDto;
 import com.team7.Idam.domain.user.dto.profile.company.CompanyProfileResponseDto;
 import com.team7.Idam.domain.user.dto.profile.company.CompanyProfileUpdateRequestDto;
 import com.team7.Idam.domain.user.entity.Company;
@@ -9,6 +10,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -102,6 +107,18 @@ public class CompanyProfileService {
         }
 
         companyRepository.save(company);
+    }
+
+    /*
+        메인 화면 Preview용 모든 기업 조회 (랜덤 3명)
+     */
+    public List<CompanyPreviewResponseDto> getAllStudents() {
+        List<Company> allStudents = companyRepository.findAll();
+        Collections.shuffle(allStudents); // 랜덤 섞기
+        return allStudents.stream()
+                .limit(3)
+                .map(CompanyPreviewResponseDto::from)
+                .collect(Collectors.toList());
     }
 
 }
