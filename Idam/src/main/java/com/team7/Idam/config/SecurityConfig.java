@@ -31,7 +31,6 @@ public class SecurityConfig {
     private final JwtTokenProvider jwtTokenProvider;
     private final UserRepository userRepository;
 
-    // BCrypt >> 비밀번호를 "단방향 해시"로 안전하게 변환해주는 암호화 알고리즘
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -39,15 +38,13 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        // accessToken 검증 필터 (refresh, logout 경로는 검증 스킵하도록 내부에 작성함)
         JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(jwtTokenProvider, userRepository);
-        // refreshToken 검증 필터 (refresh, logout 경로만 검증하도록 내부에 작성함)
         JwtRefreshAuthenticationFilter jwtRefreshAuthenticationFilter = new JwtRefreshAuthenticationFilter(jwtTokenProvider);
 
         return http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // ✅ 이 한 줄 추가!
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(
                                 "/api/signup/**",
                                 "/api/login",
@@ -55,11 +52,11 @@ public class SecurityConfig {
                                 "/api/ai-tag",
                                 "/api/categories/**",
                                 "/api/matching/by-ai",
+                                "/api/students/preview",
                                 "/ws/**",
-                                "/info",
-                                "/ws/chat/info",
+                                "/ws/chat/**",
                                 "/sockjs-node/**",
-                                "/api/students/preview"
+                                "/info"
                         ).permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/**").hasAnyRole("USER", "ADMIN")
@@ -84,11 +81,6 @@ public class SecurityConfig {
                 .build();
     }
 
-    // AuthenticationManager Bean 등록
-    /*
-        유효한 사용자인지(로그인 성공인지 실패인지) 검증.
-        Spring Security 내부에 이미 설정된 인증 로직을 빈으로 등록.
-     */
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
         return configuration.getAuthenticationManager();
@@ -99,22 +91,24 @@ public class SecurityConfig {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
+                // ✅ API 요청용
                 registry.addMapping("/api/**")
-                        .allowedOrigins(
-                                "http://localhost:3000",
-                                "https://idam.vercel.app"   // ✅ 추가
-                        )
+                        .allowedOrigins("http://localhost:3000", "https://idam.vercel.app")
                         .allowedMethods("*")
-                        .allowedHeaders("*")
+                        .allowedHeaders("Content-Type", "Authorization", "Cookie") // 🔥 쿠키 추가
                         .allowCredentials(true);
 
+                // ✅ 웹소켓용 (STOMP + SockJS 핸드셰이크 포함)
                 registry.addMapping("/ws/**")
-                        .allowedOrigins(
-                                "http://localhost:3000",
-                                "https://idam.vercel.app"   // ✅ 추가
-                        )
+                        .allowedOrigins("http://localhost:3000", "https://idam.vercel.app")
                         .allowedMethods("*")
-                        .allowedHeaders("*")
+                        .allowedHeaders("Content-Type", "Authorization", "Cookie")
+                        .allowCredentials(true);
+
+                registry.addMapping("/ws/chat/**")
+                        .allowedOrigins("http://localhost:3000", "https://idam.vercel.app")
+                        .allowedMethods("*")
+                        .allowedHeaders("Content-Type", "Authorization", "Cookie")
                         .allowCredentials(true);
             }
         };
