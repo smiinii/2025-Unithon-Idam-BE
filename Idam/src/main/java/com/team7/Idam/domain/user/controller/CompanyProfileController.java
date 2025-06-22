@@ -1,5 +1,6 @@
 package com.team7.Idam.domain.user.controller;
 
+import com.team7.Idam.domain.user.dto.profile.company.CompanyPreviewResponseDto;
 import com.team7.Idam.domain.user.dto.profile.company.CompanyProfileResponseDto;
 import com.team7.Idam.domain.user.dto.profile.company.CompanyProfileUpdateRequestDto;
 import com.team7.Idam.domain.user.service.CompanyProfileService;
@@ -8,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/company")
@@ -42,6 +45,14 @@ public class CompanyProfileController {
     public ResponseEntity<ApiResponse<Void>> updateCompanyProfile(@PathVariable Long userId, @RequestBody CompanyProfileUpdateRequestDto request) {
         companyService.updateCompanyProfile(userId, request);
         return ResponseEntity.ok(ApiResponse.success("프로필이 수정되었습니다."));
+    }
+
+    // 메인 화면 Preview용 모든 기업 조회
+    @GetMapping("/preview")
+    public ResponseEntity<ApiResponse<List<CompanyPreviewResponseDto>>> getAllStudents() {
+        return ResponseEntity.ok(
+                ApiResponse.success("모든 기업 조회 성공", companyService.getAllStudents())
+        );
     }
 
 }

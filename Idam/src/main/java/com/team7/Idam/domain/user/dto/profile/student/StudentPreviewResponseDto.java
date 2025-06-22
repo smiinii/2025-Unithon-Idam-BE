@@ -19,6 +19,9 @@ public class StudentPreviewResponseDto {
     private List<String> tags;
     private Long categoryId;
 
+    /*
+        Student 도메인 객체를 StudentPreviewResponseDto로 변환하는 정적 팩토리 메서드.
+     */
     public static StudentPreviewResponseDto from(Student student) {
         return new StudentPreviewResponseDto(
                 student.getId(),
