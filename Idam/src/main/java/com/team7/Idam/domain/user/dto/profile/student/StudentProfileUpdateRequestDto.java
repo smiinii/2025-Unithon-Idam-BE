@@ -1,4 +1,4 @@
-package com.team7.Idam.domain.user.dto.profile;
+package com.team7.Idam.domain.user.dto.profile.student;
 
 import com.team7.Idam.domain.user.entity.enums.Gender;
 import lombok.Data;

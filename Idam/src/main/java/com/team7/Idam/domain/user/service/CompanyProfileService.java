@@ -1,6 +1,7 @@
 package com.team7.Idam.domain.user.service;
 
-import com.team7.Idam.domain.user.dto.profile.CompanyProfileResponseDto;
+import com.team7.Idam.domain.user.dto.profile.company.CompanyProfileResponseDto;
+import com.team7.Idam.domain.user.dto.profile.company.CompanyProfileUpdateRequestDto;
 import com.team7.Idam.domain.user.entity.Company;
 import com.team7.Idam.domain.user.repository.CompanyRepository;
 import com.team7.Idam.global.util.SecurityUtil;
@@ -41,6 +42,7 @@ public class CompanyProfileService {
                 .profileImage(company.getProfileImage())
                 .email(company.getUser().getEmail())
                 .phone(company.getUser().getPhone())
+                .companyDescription(company.getCompanyDescription())
                 .build();
     }
 
@@ -82,4 +84,24 @@ public class CompanyProfileService {
         company.setProfileImage(null);
         companyRepository.save(company);
     }
+
+    /*
+        기업 프로필 정보 수정
+     */
+    public void updateCompanyProfile(Long userId, CompanyProfileUpdateRequestDto request) {
+        validateCompanyAccess(userId);
+
+        Company company = companyRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 기업을 찾을 수 없습니다."));
+
+        if(request.getCompanyDescription() != null) {
+            company.setCompanyDescription(request.getCompanyDescription());
+        }
+        if(request.getWebsite() != null) {
+            company.setWebsite(request.getWebsite());
+        }
+
+        companyRepository.save(company);
+    }
+
 }

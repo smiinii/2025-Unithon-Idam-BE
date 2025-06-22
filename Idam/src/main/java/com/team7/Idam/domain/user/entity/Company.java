@@ -37,4 +37,7 @@ public class Company {
 
     @Column(name = "profile_image", length = 255)
     private String profileImage;
+
+    @Column(name= "company_description", nullable = false, length = 255)
+    private String companyDescription;
 }

@@ -1,4 +1,4 @@
-package com.team7.Idam.domain.user.dto.profile;
+package com.team7.Idam.domain.user.dto.profile.company;
 
 import lombok.Builder;
 import lombok.Data;
@@ -13,4 +13,5 @@ public class CompanyProfileResponseDto {
     private String profileImage;
     private String email;
     private String phone;
+    private String companyDescription;
 }
