@@ -67,6 +67,15 @@ public class UserDataInitializer implements CommandLineRunner {
                 "https://unithon-idam.s3.ap-northeast-2.amazonaws.com/29.jpg",
                 "https://unithon-idam.s3.ap-northeast-2.amazonaws.com/30.jpg"
         );
+        // 가상 학생 닉네임 리스트
+        List<String> studentNicknames = List.of(
+                "codefox12", "skywalker07", "devminjae", "junoByte", "tech_jihun",
+                "seoyeon_in", "junyoung99", "jiwoo_dev", "minseo.ai", "yerinXD",
+                "hajun_studio", "seoah__design", "hyunwoo.coder", "blue_haneul", "yujin_star",
+                "dohyun_devv", "zimin_says", "haeun.tech", "jihoolog", "dain_lab",
+                "harang.codes", "sia_pixel", "siwoo_js", "nayoon_dev", "jia_flow",
+                "chaeminUX", "jihuu_node", "serin_works", "hyunwoo23", "gaul_dev"
+        );
 
         int studentId = 1;
 
@@ -93,7 +102,7 @@ public class UserDataInitializer implements CommandLineRunner {
                         Student.builder()
                                 .user(studentUser)
                                 .name(studentNames.get(studentId - 1))
-                                .nickname("stud" + studentId)
+                                .nickname(studentNicknames.get(studentId - 1))
                                 .schoolName("인천대학교")
                                 .major("정보통신공학과")
                                 .schoolId("2023" + String.format("%05d", studentId))
