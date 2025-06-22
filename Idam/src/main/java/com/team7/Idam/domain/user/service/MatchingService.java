@@ -51,7 +51,7 @@ public class MatchingService {
                     .filter(tagNameSet::contains)
                     .count();
 
-            result.add(new ScoredStudentResponseDto(student.getId(), student.getName(), student.getProfileImage(), score));
+            result.add(new ScoredStudentResponseDto(student.getId(), student.getNickname(), student.getProfileImage(), score));
         }
 
         return result.stream()
