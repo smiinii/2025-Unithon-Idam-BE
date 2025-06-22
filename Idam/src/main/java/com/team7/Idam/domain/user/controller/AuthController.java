@@ -91,13 +91,9 @@ public class AuthController {
         cookie.setMaxAge(60 * 60 * 24 * 7);      // 7일 (단위: 초)
         response.addCookie(cookie);
 
-        // ✅ SameSite=None 추가로 붙여주기
-        // 쿠키 문자열을 다시 덮어쓰기 하되, 원래의 쿠키 설정을 참고하여 맞춰줘야 함
-        String setCookieHeader = String.format(
-                "refreshToken=%s; Max-Age=%d; Path=/; Secure; HttpOnly; SameSite=None",
-                refreshToken, 60 * 60 * 24 * 7
-        );
-        response.setHeader("Set-Cookie", setCookieHeader); // 덮어쓰기 방식
+        // 추가 로그 확인
+        System.out.println("🔥 쿠키 추가 완료: refreshToken=" + refreshToken);
+        System.out.println("🔥 응답 Set-Cookie 헤더: " + response.getHeader("Set-Cookie")); // ❗ 거의 null일 수 있음
     }
 
     // 쿠키에서 Refresh Token 꺼내기 (재발급 시 사용)
