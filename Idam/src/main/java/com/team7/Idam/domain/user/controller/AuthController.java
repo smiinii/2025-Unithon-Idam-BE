@@ -85,7 +85,7 @@ public class AuthController {
     // Refresh Token을 쿠키에 저장 (로그인, 재발급 시 사용)
     private void addRefreshTokenToCookie(HttpServletResponse response, String refreshToken) {
         String cookieString = String.format(
-                "refreshToken=%s; Max-Age=%d; Path=/; Secure; HttpOnly; SameSite=None; Domain=smini.site",
+                "refreshToken=%s; Max-Age=%d; Path=/; Secure; HttpOnly; SameSite=None",
                 refreshToken, 60 * 60 * 24 * 7
         );
         response.setHeader("Set-Cookie", cookieString);
