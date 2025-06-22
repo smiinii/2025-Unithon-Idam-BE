@@ -7,6 +7,7 @@ import com.team7.Idam.domain.user.service.AuthService;
 import com.team7.Idam.global.util.RefreshTokenStore;
 import com.team7.Idam.jwt.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -84,15 +85,19 @@ public class AuthController {
 
     // Refresh Token을 쿠키에 저장 (로그인, 재발급 시 사용)
     private void addRefreshTokenToCookie(HttpServletResponse response, String refreshToken) {
-        String cookieString = String.format(
-                "refreshToken=%s; Max-Age=%d; Path=/; Secure; HttpOnly; SameSite=None",
-                refreshToken, 60 * 60 * 24 * 7
-        );
-        response.setHeader("Set-Cookie", cookieString);
+        ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
+                .maxAge(60 * 60 * 24 * 7)
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .sameSite("None")
+                .build();
+
+        response.addHeader("Set-Cookie", cookie.toString());
 
         System.out.println("🔥 refreshToken 쿠키 설정 완료");
         System.out.println("→ Token: " + refreshToken);
-        System.out.println("→ 전체 헤더: " + cookieString);
+        System.out.println("→ 전체 헤더: " + cookie.toString());
     }
 
     // 쿠키에서 Refresh Token 꺼내기 (재발급 시 사용)
