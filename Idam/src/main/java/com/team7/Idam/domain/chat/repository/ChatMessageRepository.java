@@ -10,5 +10,5 @@ import java.util.List;
 public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long> {
     List<ChatMessage> findByChatRoomOrderBySentAtAsc(ChatRoom chatRoom);
 
-    int countByChatRoomAndSenderNotAndReadFalse(ChatRoom chatRoom, User sender);
+    int countByChatRoomAndSenderNotAndIsReadFalse(ChatRoom chatRoom, User sender);
 }

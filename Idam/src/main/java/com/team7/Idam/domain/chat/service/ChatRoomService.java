@@ -55,7 +55,7 @@ public class ChatRoomService {
         return chatRoomRepository.findByCompanyAndIsDeletedByCompanyFalse(company).stream()
                 .map(room -> {
                     int unreadCount = chatMessageRepository
-                            .countByChatRoomAndSenderNotAndReadFalse(room, company);
+                            .countByChatRoomAndSenderNotAndIsReadFalse(room, company);
                     return ChatRoomResponseDto.from(room, company, unreadCount);
                 })
                 .collect(Collectors.toList());
@@ -67,7 +67,7 @@ public class ChatRoomService {
         return chatRoomRepository.findByStudentAndIsDeletedByStudentFalse(student).stream()
                 .map(room -> {
                     int unreadCount = chatMessageRepository
-                            .countByChatRoomAndSenderNotAndReadFalse(room, student);
+                            .countByChatRoomAndSenderNotAndIsReadFalse(room, student);
                     return ChatRoomResponseDto.from(room, student, unreadCount);
                 })
                 .collect(Collectors.toList());
