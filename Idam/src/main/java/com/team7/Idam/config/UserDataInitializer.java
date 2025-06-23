@@ -56,16 +56,16 @@ public class UserDataInitializer implements CommandLineRunner {
                 "https://unithon-idam.s3.ap-northeast-2.amazonaws.com/18.jpeg",
                 "https://unithon-idam.s3.ap-northeast-2.amazonaws.com/19.jpeg",
                 "https://unithon-idam.s3.ap-northeast-2.amazonaws.com/20.jpeg",
-                "https://unithon-idam.s3.ap-northeast-2.amazonaws.com/21.jpeg",
-                "https://unithon-idam.s3.ap-northeast-2.amazonaws.com/22.jpeg",
-                "https://unithon-idam.s3.ap-northeast-2.amazonaws.com/23.jpeg",
-                "https://unithon-idam.s3.ap-northeast-2.amazonaws.com/24.jpeg",
-                "https://unithon-idam.s3.ap-northeast-2.amazonaws.com/25.jpeg",
-                "https://unithon-idam.s3.ap-northeast-2.amazonaws.com/26.jpeg",
-                "https://unithon-idam.s3.ap-northeast-2.amazonaws.com/27.jpeg",
-                "https://unithon-idam.s3.ap-northeast-2.amazonaws.com/28.jpeg",
-                "https://unithon-idam.s3.ap-northeast-2.amazonaws.com/29.jpeg",
-                "https://unithon-idam.s3.ap-northeast-2.amazonaws.com/30.jpeg"
+                "https://unithon-idam.s3.ap-northeast-2.amazonaws.com/21.png",
+                "https://unithon-idam.s3.ap-northeast-2.amazonaws.com/22.png",
+                "https://unithon-idam.s3.ap-northeast-2.amazonaws.com/23.png",
+                "https://unithon-idam.s3.ap-northeast-2.amazonaws.com/24.png",
+                "https://unithon-idam.s3.ap-northeast-2.amazonaws.com/25.png",
+                "https://unithon-idam.s3.ap-northeast-2.amazonaws.com/26.png",
+                "https://unithon-idam.s3.ap-northeast-2.amazonaws.com/27.png",
+                "https://unithon-idam.s3.ap-northeast-2.amazonaws.com/28.png",
+                "https://unithon-idam.s3.ap-northeast-2.amazonaws.com/29.png",
+                "https://unithon-idam.s3.ap-northeast-2.amazonaws.com/30.png"
         );
         // 가상 학생 닉네임 리스트
         List<String> studentNicknames = List.of(
