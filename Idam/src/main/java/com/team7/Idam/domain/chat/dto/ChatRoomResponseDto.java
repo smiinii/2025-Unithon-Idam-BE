@@ -19,8 +19,15 @@ public class ChatRoomResponseDto {
     private String lastMessage;
     private LocalDateTime lastMessageAt;
     private String projectTitle;
+    private int unreadCount;
 
+    // ✅ 기존 메서드는 기본값 0을 주입
     public static ChatRoomResponseDto from(ChatRoom room, User currentUser) {
+        return from(room, currentUser, 0);
+    }
+
+    // ✅ 새로 추가된 메서드: unreadCount 포함
+    public static ChatRoomResponseDto from(ChatRoom room, User currentUser, int unreadCount) {
         User opponent = room.getCompany().equals(currentUser)
                 ? room.getStudent()
                 : room.getCompany();
@@ -45,6 +52,7 @@ public class ChatRoomResponseDto {
                 .lastMessage(room.getLastMessage())
                 .lastMessageAt(room.getLastMessageAt())
                 .projectTitle(room.getProjectTitle())
+                .unreadCount(unreadCount)
                 .build();
     }
 }

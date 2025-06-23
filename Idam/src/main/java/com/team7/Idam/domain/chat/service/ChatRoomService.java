@@ -3,6 +3,7 @@ package com.team7.Idam.domain.chat.service;
 import com.team7.Idam.domain.chat.dto.ChatRoomRequestDto;
 import com.team7.Idam.domain.chat.dto.ChatRoomResponseDto;
 import com.team7.Idam.domain.chat.entity.ChatRoom;
+import com.team7.Idam.domain.chat.repository.ChatMessageRepository;
 import com.team7.Idam.domain.chat.repository.ChatRoomRepository;
 import com.team7.Idam.domain.user.entity.User;
 import com.team7.Idam.domain.user.entity.enums.UserType;
@@ -22,6 +23,7 @@ import static com.team7.Idam.global.util.SecurityUtil.getCurrentUserType;
 public class ChatRoomService {
 
     private final ChatRoomRepository chatRoomRepository;
+    private final ChatMessageRepository chatMessageRepository;
 
     public static void validateCompanyAccess() {
         if (getCurrentUserType() != UserType.COMPANY) {
@@ -47,29 +49,31 @@ public class ChatRoomService {
         return ChatRoomResponseDto.from(savedRoom, company);
     }
 
-    // 2. 기존에 살아있는 채팅방 조회 (DTO 반환)
-    public Optional<ChatRoomResponseDto> getActiveRoom(User company, User student) {
-        return chatRoomRepository.findActiveRoomByUsers(company, student)
-                .map(room -> ChatRoomResponseDto.from(room, company));
-    }
-
-    // 3. 기업의 채팅방 목록 조회 (DTO 반환)
+    // 2. 기업의 채팅방 목록 조회 (DTO 반환)
     public List<ChatRoomResponseDto> getCompanyChatRooms(User company) {
-        validateCompanyAccess(); // 기업 타입만 실행 가능
+        validateCompanyAccess();
         return chatRoomRepository.findByCompanyAndIsDeletedByCompanyFalse(company).stream()
-                .map(room -> ChatRoomResponseDto.from(room, company))
+                .map(room -> {
+                    int unreadCount = chatMessageRepository
+                            .countByChatRoomAndSenderNotAndReadFalse(room, company);
+                    return ChatRoomResponseDto.from(room, company, unreadCount);
+                })
                 .collect(Collectors.toList());
     }
 
-    // 4. 학생의 채팅방 목록 조회 (DTO 반환)
+    // 3. 학생의 채팅방 목록 조회 (DTO 반환)
     public List<ChatRoomResponseDto> getStudentChatRooms(User student) {
-        validateStudentAccess(); // 학생 타입만 실행 가능
+        validateStudentAccess();
         return chatRoomRepository.findByStudentAndIsDeletedByStudentFalse(student).stream()
-                .map(room -> ChatRoomResponseDto.from(room, student))
+                .map(room -> {
+                    int unreadCount = chatMessageRepository
+                            .countByChatRoomAndSenderNotAndReadFalse(room, student);
+                    return ChatRoomResponseDto.from(room, student, unreadCount);
+                })
                 .collect(Collectors.toList());
     }
 
-    // 5. 기업이 채팅방 soft delete
+    // 4. 기업이 채팅방 soft delete
     @Transactional
     public void deleteRoomByCompany(Long roomId, User company) {
         validateCompanyAccess(); // 기업 타입만 실행 가능
@@ -81,7 +85,7 @@ public class ChatRoomService {
         room.deleteByCompany();
     }
 
-    // 6. 학생이 채팅방 soft delete
+    // 5. 학생이 채팅방 soft delete
     @Transactional
     public void deleteRoomByStudent(Long roomId, User student) {
         validateStudentAccess(); // 학생 타입만 실행 가능
@@ -91,21 +95,5 @@ public class ChatRoomService {
             throw new SecurityException("해당 학생의 채팅방이 아닙니다.");
         }
         room.deleteByStudent();
-    }
-
-    // 7. 기업이 학생 닉네임으로 채팅방 검색 (DTO 반환)
-    public List<ChatRoomResponseDto> searchRoomsByStudentNickname(User company, String keyword) {
-        validateCompanyAccess(); // 기업 타입만 실행 가능
-        return chatRoomRepository.searchRoomsByStudentNickname(company, keyword).stream()
-                .map(room -> ChatRoomResponseDto.from(room, company))
-                .collect(Collectors.toList());
-    }
-
-    // 8. 학생이 기업 이름으로 채팅방 검색 (DTO 반환)
-    public List<ChatRoomResponseDto> searchRoomsByCompanyName(User student, String keyword) {
-        validateStudentAccess(); // 학생 타입만 실행 가능
-        return chatRoomRepository.searchRoomsByCompanyName(student, keyword).stream()
-                .map(room -> ChatRoomResponseDto.from(room, student))
-                .collect(Collectors.toList());
     }
 }
