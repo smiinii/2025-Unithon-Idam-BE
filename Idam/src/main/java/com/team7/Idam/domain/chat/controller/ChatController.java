@@ -59,6 +59,10 @@ public class ChatController {
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         User user = userService.getUserById(userDetails.getId());
+
+        // ✅ 읽음 처리 먼저 수행
+        chatMessageService.markMessagesAsRead(roomId, user);
+
         return ResponseEntity.ok(chatMessageService.getMessagesByRoom(roomId, user));
     }
 
