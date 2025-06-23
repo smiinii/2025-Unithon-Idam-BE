@@ -2,17 +2,19 @@ package com.team7.Idam.domain.chat.service;
 
 import com.team7.Idam.domain.chat.dto.ChatRoomRequestDto;
 import com.team7.Idam.domain.chat.dto.ChatRoomResponseDto;
+import com.team7.Idam.domain.chat.entity.ChatMessage;
 import com.team7.Idam.domain.chat.entity.ChatRoom;
 import com.team7.Idam.domain.chat.repository.ChatMessageRepository;
 import com.team7.Idam.domain.chat.repository.ChatRoomRepository;
 import com.team7.Idam.domain.user.entity.User;
 import com.team7.Idam.domain.user.entity.enums.UserType;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -39,7 +41,17 @@ public class ChatRoomService {
 
     // 1. 새로운 채팅방 생성
     public ChatRoomResponseDto createRoom(User company, User student, ChatRoomRequestDto request) {
-        validateCompanyAccess(); // 기업 타입만 실행 가능
+        validateCompanyAccess();
+
+        // 1. 기존 채팅방 존재 여부 확인
+        Optional<ChatRoom> existingRoom =
+                chatRoomRepository.findByCompanyAndStudentAndIsDeletedByCompanyFalseAndIsDeletedByStudentFalse(company, student);
+
+        if (existingRoom.isPresent()) {
+            return ChatRoomResponseDto.from(existingRoom.get(), company); // 기존 방 반환
+        }
+
+        // 2. 없으면 새로 생성
         ChatRoom chatRoom = ChatRoom.builder()
                 .company(company)
                 .student(student)
@@ -49,34 +61,67 @@ public class ChatRoomService {
         return ChatRoomResponseDto.from(savedRoom, company);
     }
 
-    // 2. 기업의 채팅방 목록 조회 (DTO 반환)
+    // 공통: 유저의 읽지 않은 메시지 수를 Map으로 변환
+    private Map<Long, Integer> getUnreadMap(User user) {
+        List<ChatMessageRepository.UnreadCountProjection> unreadCounts =
+                chatMessageRepository.findUnreadCountsForUser(user);
+
+        return unreadCounts.stream()
+                .collect(Collectors.toMap(
+                        ChatMessageRepository.UnreadCountProjection::getRoomId,
+                        ChatMessageRepository.UnreadCountProjection::getUnreadCount
+                ));
+    }
+
+    // 공통: 채팅방별 마지막 메시지를 Map으로 변환
+    private Map<Long, ChatMessage> getLastMessageMap(List<ChatRoom> rooms) {
+        List<ChatMessage> lastMessages = chatMessageRepository.findLastMessagesForRooms(rooms);
+
+        return lastMessages.stream()
+                .collect(Collectors.toMap(
+                        m -> m.getChatRoom().getId(),
+                        m -> m
+                ));
+    }
+
+    // 2. 기업 채팅방 목록 조회
     public List<ChatRoomResponseDto> getCompanyChatRooms(User company) {
         validateCompanyAccess();
-        return chatRoomRepository.findByCompanyAndIsDeletedByCompanyFalse(company).stream()
+
+        List<ChatRoom> rooms = chatRoomRepository.findByCompanyAndIsDeletedByCompanyFalse(company);
+        Map<Long, Integer> unreadMap = getUnreadMap(company);
+        Map<Long, ChatMessage> lastMessageMap = getLastMessageMap(rooms);
+
+        return rooms.stream()
                 .map(room -> {
-                    int unreadCount = chatMessageRepository
-                            .countByChatRoomAndSenderNotAndIsReadFalse(room, company);
-                    return ChatRoomResponseDto.from(room, company, unreadCount);
+                    int unreadCount = unreadMap.getOrDefault(room.getId(), 0);
+                    ChatMessage lastMessage = lastMessageMap.get(room.getId());
+                    return ChatRoomResponseDto.from(room, company, unreadCount, lastMessage);
                 })
                 .collect(Collectors.toList());
     }
 
-    // 3. 학생의 채팅방 목록 조회 (DTO 반환)
+    // 3. 학생 채팅방 목록 조회
     public List<ChatRoomResponseDto> getStudentChatRooms(User student) {
         validateStudentAccess();
-        return chatRoomRepository.findByStudentAndIsDeletedByStudentFalse(student).stream()
+
+        List<ChatRoom> rooms = chatRoomRepository.findByStudentAndIsDeletedByStudentFalse(student);
+        Map<Long, Integer> unreadMap = getUnreadMap(student);
+        Map<Long, ChatMessage> lastMessageMap = getLastMessageMap(rooms);
+
+        return rooms.stream()
                 .map(room -> {
-                    int unreadCount = chatMessageRepository
-                            .countByChatRoomAndSenderNotAndIsReadFalse(room, student);
-                    return ChatRoomResponseDto.from(room, student, unreadCount);
+                    int unreadCount = unreadMap.getOrDefault(room.getId(), 0);
+                    ChatMessage lastMessage = lastMessageMap.get(room.getId());
+                    return ChatRoomResponseDto.from(room, student, unreadCount, lastMessage);
                 })
                 .collect(Collectors.toList());
     }
 
-    // 4. 기업이 채팅방 soft delete
+    // 4. 기업 soft delete
     @Transactional
     public void deleteRoomByCompany(Long roomId, User company) {
-        validateCompanyAccess(); // 기업 타입만 실행 가능
+        validateCompanyAccess();
         ChatRoom room = chatRoomRepository.findById(roomId)
                 .orElseThrow(() -> new IllegalArgumentException("채팅방이 존재하지 않습니다."));
         if (!room.getCompany().equals(company)) {
@@ -85,10 +130,10 @@ public class ChatRoomService {
         room.deleteByCompany();
     }
 
-    // 5. 학생이 채팅방 soft delete
+    // 5. 학생 soft delete
     @Transactional
     public void deleteRoomByStudent(Long roomId, User student) {
-        validateStudentAccess(); // 학생 타입만 실행 가능
+        validateStudentAccess();
         ChatRoom room = chatRoomRepository.findById(roomId)
                 .orElseThrow(() -> new IllegalArgumentException("채팅방이 존재하지 않습니다."));
         if (!room.getStudent().equals(student)) {

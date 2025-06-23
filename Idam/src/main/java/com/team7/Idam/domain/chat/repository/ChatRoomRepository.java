@@ -43,4 +43,6 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
             @Param("keyword") String keyword
     );
 
+    Optional<ChatRoom> findByCompanyAndStudentAndIsDeletedByCompanyFalseAndIsDeletedByStudentFalse(User company, User student);
+
 }

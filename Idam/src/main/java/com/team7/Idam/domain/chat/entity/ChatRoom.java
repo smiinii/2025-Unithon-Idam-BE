@@ -6,6 +6,7 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.List;
 
 @Entity
 @Table(name = "chat_room")
@@ -28,6 +29,9 @@ public class ChatRoom {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "student_user_id", nullable = false)
     private User student;
+
+    @OneToMany(mappedBy = "chatRoom", fetch = FetchType.LAZY)
+    private List<ChatMessage> messages;
 
     // 마지막 메시지 캐싱
     @Column(name = "last_message")

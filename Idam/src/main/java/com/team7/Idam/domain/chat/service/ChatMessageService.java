@@ -35,17 +35,27 @@ public class ChatMessageService {
             throw new SecurityException("채팅방에 참여한 사용자만 메시지를 보낼 수 있습니다.");
         }
 
+        // ✅ 여기서 Soft Delete 복구 로직 추가
+        if (room.isDeletedByCompany() && senderId.equals(companyId)) {
+            room.setDeletedByCompany(false);
+        }
+        if (room.isDeletedByStudent() && senderId.equals(studentId)) {
+            room.setDeletedByStudent(false);
+        }
+
         ChatMessage message = ChatMessage.builder()
                 .chatRoom(room)
                 .sender(sender)
                 .content(content)
                 .build();
 
-        // 마지막 메시지 업데이트
+        // 마지막 메시지 및 전송 시간 업데이트
         room.updateLastMessage(content);
+        chatRoomRepository.save(room);
+
         ChatMessage savedMessage = chatMessageRepository.save(message);
 
-        User receiver = sender.getId().equals(companyId)
+        User receiver = senderId.equals(companyId)
                 ? room.getStudent()
                 : room.getCompany();
 

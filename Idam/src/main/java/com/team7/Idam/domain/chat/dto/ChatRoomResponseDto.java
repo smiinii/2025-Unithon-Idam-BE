@@ -1,5 +1,6 @@
 package com.team7.Idam.domain.chat.dto;
 
+import com.team7.Idam.domain.chat.entity.ChatMessage;
 import com.team7.Idam.domain.chat.entity.ChatRoom;
 import com.team7.Idam.domain.user.entity.User;
 import com.team7.Idam.domain.user.entity.enums.UserType;
@@ -21,13 +22,18 @@ public class ChatRoomResponseDto {
     private String projectTitle;
     private int unreadCount;
 
-    // ✅ 기존 메서드는 기본값 0을 주입
+    // 가장 기본 형태
     public static ChatRoomResponseDto from(ChatRoom room, User currentUser) {
-        return from(room, currentUser, 0);
+        return from(room, currentUser, 0, null);
     }
 
-    // ✅ 새로 추가된 메서드: unreadCount 포함
+    // unreadCount 포함
     public static ChatRoomResponseDto from(ChatRoom room, User currentUser, int unreadCount) {
+        return from(room, currentUser, unreadCount, null);
+    }
+
+    // unreadCount와 lastMessage까지 포함 (WebSocket에 적합)
+    public static ChatRoomResponseDto from(ChatRoom room, User currentUser, int unreadCount, ChatMessage lastMessage) {
         User opponent = room.getCompany().equals(currentUser)
                 ? room.getStudent()
                 : room.getCompany();
@@ -49,8 +55,8 @@ public class ChatRoomResponseDto {
                 .opponentId(opponent.getId())
                 .opponentName(opponentName)
                 .opponentProfileImage(opponentProfileImage)
-                .lastMessage(room.getLastMessage())
-                .lastMessageAt(room.getLastMessageAt())
+                .lastMessage(lastMessage != null ? lastMessage.getContent() : room.getLastMessage())
+                .lastMessageAt(lastMessage != null ? lastMessage.getSentAt() : room.getLastMessageAt())
                 .projectTitle(room.getProjectTitle())
                 .unreadCount(unreadCount)
                 .build();
