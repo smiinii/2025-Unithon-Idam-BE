@@ -30,9 +30,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String uri = request.getRequestURI();
         String method = request.getMethod();
-        System.out.println("🔥 요청 URI: " + uri);
-        System.out.println("🔥 HTTP Method: " + method);
-        System.out.println("🔥 들어온 Authorization 헤더: " + request.getHeader("Authorization"));
+
+        // preview만 제외 (서버 로그 제거)
+        if (!uri.equals("/api/students/preview") && !uri.equals("/api/company/preview")) {
+            System.out.println("🔥 요청 URI: " + uri);
+            System.out.println("🔥 HTTP Method: " + method);
+            System.out.println("🔥 들어온 Authorization 헤더: " + request.getHeader("Authorization"));
+        }
 
         if ("OPTIONS".equalsIgnoreCase(method) ||
                 uri.startsWith("/ws/") ||
