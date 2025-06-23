@@ -95,8 +95,14 @@ public class ChatMessageService {
         ChatRoom room = chatRoomRepository.findById(roomId)
                 .orElseThrow(() -> new IllegalArgumentException("채팅방이 존재하지 않습니다."));
 
-        chatMessageRepository.findByChatRoomOrderBySentAtAsc(room).stream()
+        long count = chatMessageRepository.findByChatRoomOrderBySentAtAsc(room).stream()
                 .filter(m -> !m.getSender().getId().equals(reader.getId()) && !m.isRead())
-                .forEach(ChatMessage::markAsRead);
+                .peek(m -> {
+                    m.markAsRead();
+                    System.out.println("📖 읽음 처리된 메시지 ID: " + m.getId());
+                })
+                .count();
+
+        System.out.println("✅ 총 " + count + "개의 메시지 read=true 처리됨");
     }
 }

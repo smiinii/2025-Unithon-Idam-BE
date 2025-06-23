@@ -57,6 +57,11 @@ public class ChatSocketController {
         ChatMessage lastMessage = chatMessageRepository.findTopByChatRoomOrderBySentAtDesc(room).orElse(null);
 
         ChatRoomResponseDto summary = ChatRoomResponseDto.from(room, receiver, unreadCount, lastMessage);
+
+        System.out.println("📤 [요약 전송] 수신자 ID: " + receiver.getId());
+        System.out.println("📤 [요약 전송] unreadCount: " + unreadCount);
+        System.out.println("📤 [요약 전송] 마지막 메시지: " + (lastMessage != null ? lastMessage.getContent() : "없음"));
+
         messagingTemplate.convertAndSend("/sub/chat/summary/" + receiver.getId(), summary);
     }
 
@@ -75,6 +80,10 @@ public class ChatSocketController {
         User opponent = room.getCompany().getId().equals(readerId)
                 ? room.getStudent()
                 : room.getCompany();
+
+        System.out.println("📥 [읽음 처리] 읽은 사람 ID: " + readerId);
+        System.out.println("📥 [읽음 처리] 상대방(opponent) ID: " + opponent.getId());
+        System.out.println("📥 [읽음 처리] 전송 경로: /sub/chat/read/" + roomId + "/" + opponent.getId());
 
         messagingTemplate.convertAndSend(
                 "/sub/chat/read/" + roomId + "/" + opponent.getId(),
