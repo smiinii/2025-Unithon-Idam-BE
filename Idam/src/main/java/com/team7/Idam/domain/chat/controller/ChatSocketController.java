@@ -2,6 +2,11 @@ package com.team7.Idam.domain.chat.controller;
 
 import com.team7.Idam.domain.chat.dto.ChatMessageResponseDto;
 import com.team7.Idam.domain.chat.dto.ChatMessageSocketDto;
+import com.team7.Idam.domain.chat.dto.ChatRoomResponseDto;
+import com.team7.Idam.domain.chat.entity.ChatMessage;
+import com.team7.Idam.domain.chat.entity.ChatRoom;
+import com.team7.Idam.domain.chat.repository.ChatMessageRepository;
+import com.team7.Idam.domain.chat.repository.ChatRoomRepository;
 import com.team7.Idam.domain.chat.service.ChatMessageService;
 import com.team7.Idam.domain.user.entity.User;
 import com.team7.Idam.domain.user.service.UserService;
@@ -19,35 +24,61 @@ public class ChatSocketController {
 
     private final ChatMessageService chatMessageService;
     private final UserService userService;
+    private final ChatRoomRepository chatRoomRepository;
+    private final ChatMessageRepository chatMessageRepository;
     private final SimpMessagingTemplate messagingTemplate;
 
-    // /pub/chat/send로 메시지가 전송되면 실행
+    // 메시지 전송
     @MessageMapping("/chat/send")
     public void send(@Payload ChatMessageSocketDto dto, Principal principal) {
-        System.out.println("📩 [WebSocket 수신] 메시지 도착: " + dto);
-        System.out.println("🔐 Principal: " + (principal != null ? principal.getName() : "null"));
-        System.out.println("💬 채팅방 ID: " + dto.getRoomId());
-        System.out.println("✉️ 메시지 내용: " + dto.getContent());
-
         if (principal == null) {
-            throw new SecurityException("인증되지 않은 사용자입니다. principal이 null입니다.");
+            throw new SecurityException("인증되지 않은 사용자입니다.");
         }
 
-        Long senderId;
-        try {
-            senderId = Long.valueOf(principal.getName());
-        } catch (NumberFormatException e) {
-            throw new SecurityException("principal name이 숫자가 아님: " + principal.getName());
-        }
-
-        System.out.println("✅ 인증된 senderId: " + senderId);
-
+        Long senderId = Long.valueOf(principal.getName());
         User sender = userService.getUserById(senderId);
-        System.out.println("👤 유저 정보: " + sender.getEmail() + " / " + sender.getUserType());
 
+        // 메시지 저장
         ChatMessageResponseDto savedMessage = chatMessageService.sendMessage(dto.getRoomId(), sender, dto.getContent());
 
+        // 1️⃣ 채팅방 내부 메시지 전송
         messagingTemplate.convertAndSend("/sub/chat/room/" + dto.getRoomId(), savedMessage);
-        System.out.println("📤 메시지 전송 완료 → /sub/chat/room/" + dto.getRoomId());
+
+        // 2️⃣ 채팅방 요약정보 전송
+        ChatRoom room = chatRoomRepository.findById(dto.getRoomId())
+                .orElseThrow(() -> new IllegalArgumentException("채팅방이 존재하지 않습니다."));
+
+        User receiver = sender.equals(room.getCompany()) ? room.getStudent() : room.getCompany();
+
+        int unreadCount = (int) room.getMessages().stream()
+                .filter(m -> !m.getSender().equals(receiver) && !m.isRead())
+                .count();
+
+        ChatMessage lastMessage = chatMessageRepository.findTopByChatRoomOrderBySentAtDesc(room).orElse(null);
+
+        ChatRoomResponseDto summary = ChatRoomResponseDto.from(room, receiver, unreadCount, lastMessage);
+        messagingTemplate.convertAndSend("/sub/chat/summary/" + receiver.getId(), summary);
+    }
+
+    @MessageMapping("/chat/read")
+    public void markAsRead(@Payload Long roomId, Principal principal) {
+        if (principal == null) return;
+
+        Long readerId = Long.valueOf(principal.getName());
+        User reader = userService.getUserById(readerId);
+
+        chatMessageService.markMessagesAsRead(roomId, reader);
+
+        ChatRoom room = chatRoomRepository.findById(roomId)
+                .orElseThrow(() -> new IllegalArgumentException("채팅방이 존재하지 않습니다."));
+
+        User opponent = room.getCompany().getId().equals(readerId)
+                ? room.getStudent()
+                : room.getCompany();
+
+        messagingTemplate.convertAndSend(
+                "/sub/chat/read/" + roomId + "/" + opponent.getId(),
+                "read"
+        );
     }
 }
