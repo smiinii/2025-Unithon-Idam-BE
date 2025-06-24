@@ -3,13 +3,13 @@ package com.team7.Idam.domain.chat.controller;
 import com.team7.Idam.domain.chat.dto.ChatMessageResponseDto;
 import com.team7.Idam.domain.chat.dto.ChatMessageSocketDto;
 import com.team7.Idam.domain.chat.dto.ChatRoomResponseDto;
-import com.team7.Idam.domain.chat.entity.ChatMessage;
 import com.team7.Idam.domain.chat.entity.ChatRoom;
 import com.team7.Idam.domain.chat.repository.ChatMessageRepository;
 import com.team7.Idam.domain.chat.repository.ChatRoomRepository;
 import com.team7.Idam.domain.chat.service.ChatMessageService;
 import com.team7.Idam.domain.user.entity.User;
 import com.team7.Idam.domain.user.service.UserService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -28,41 +28,43 @@ public class ChatSocketController {
     private final ChatMessageRepository chatMessageRepository;
     private final SimpMessagingTemplate messagingTemplate;
 
-    // 메시지 전송
     @MessageMapping("/chat/send")
+    @Transactional
     public void send(@Payload ChatMessageSocketDto dto, Principal principal) {
-        if (principal == null) {
-            throw new SecurityException("인증되지 않은 사용자입니다.");
-        }
+        if (principal == null) throw new SecurityException("인증되지 않은 사용자입니다.");
 
         Long senderId = Long.valueOf(principal.getName());
         User sender = userService.getUserById(senderId);
 
-        // 메시지 저장
-        ChatMessageResponseDto savedMessage = chatMessageService.sendMessage(dto.getRoomId(), sender, dto.getContent());
+        // 💬 메시지 저장 후 DTO 반환
+        ChatMessageResponseDto messageDto = chatMessageService.sendMessage(dto.getRoomId(), sender, dto.getContent());
 
-        // 1️⃣ 채팅방 내부 메시지 전송
-        messagingTemplate.convertAndSend("/sub/chat/room/" + dto.getRoomId(), savedMessage);
-
-        // 2️⃣ 채팅방 요약정보 전송
-        ChatRoom room = chatRoomRepository.findWithMessagesById(dto.getRoomId())
+        // 채팅방 정보 조회 (메시지 포함된 fetch join 사용)
+        ChatRoom chatRoom = chatRoomRepository.findWithMessagesById(dto.getRoomId())
                 .orElseThrow(() -> new IllegalArgumentException("채팅방이 존재하지 않습니다."));
 
-        User receiver = sender.equals(room.getCompany()) ? room.getStudent() : room.getCompany();
+        // 수신자 식별
+        User receiver = sender.equals(chatRoom.getCompany()) ? chatRoom.getStudent() : chatRoom.getCompany();
 
-        int unreadCount = (int) room.getMessages().stream()
+        // ✅ 여기에 로그 삽입
+        System.out.println("🧪 메시지 DTO: " + messageDto);
+        System.out.println("🧪 채팅방: " + chatRoom);
+        System.out.println("🧪 수신자: " + receiver);
+
+        // 읽지 않은 메시지 수 계산
+        long unreadCount = chatRoom.getMessages().stream()
                 .filter(m -> !m.getSender().equals(receiver) && !m.isRead())
                 .count();
 
-        ChatMessage lastMessage = chatMessageRepository.findTopByChatRoomOrderBySentAtDesc(room).orElse(null);
+        // 1️⃣ 실시간 메시지 전송
+        messagingTemplate.convertAndSend("/sub/chat/room/" + dto.getRoomId(), messageDto);
 
-        ChatRoomResponseDto summary = ChatRoomResponseDto.from(room, receiver, unreadCount, lastMessage);
-
-        System.out.println("📤 [요약 전송] 수신자 ID: " + receiver.getId());
-        System.out.println("📤 [요약 전송] unreadCount: " + unreadCount);
-        System.out.println("📤 [요약 전송] 마지막 메시지: " + (lastMessage != null ? lastMessage.getContent() : "없음"));
-
+        // 2️⃣ 실시간 요약 정보 전송
+        ChatRoomResponseDto summary = ChatRoomResponseDto.from(chatRoom, receiver, (int) unreadCount, messageDto);
         messagingTemplate.convertAndSend("/sub/chat/summary/" + receiver.getId(), summary);
+
+        System.out.printf("📤 [요약 전송] 수신자 ID: %d, unreadCount: %d, 마지막 메시지: %s%n",
+                receiver.getId(), unreadCount, messageDto.getContent());
     }
 
     @MessageMapping("/chat/read")
@@ -77,17 +79,12 @@ public class ChatSocketController {
         ChatRoom room = chatRoomRepository.findById(roomId)
                 .orElseThrow(() -> new IllegalArgumentException("채팅방이 존재하지 않습니다."));
 
-        User opponent = room.getCompany().getId().equals(readerId)
-                ? room.getStudent()
-                : room.getCompany();
+        User opponent = room.getCompany().getId().equals(readerId) ? room.getStudent() : room.getCompany();
 
-        System.out.println("📥 [읽음 처리] 읽은 사람 ID: " + readerId);
-        System.out.println("📥 [읽음 처리] 상대방(opponent) ID: " + opponent.getId());
-        System.out.println("📥 [읽음 처리] 전송 경로: /sub/chat/read/" + roomId + "/" + opponent.getId());
+        // 3️⃣ 읽음 정보 요약으로 전송
+        ChatRoomResponseDto updatedSummary = ChatRoomResponseDto.from(room, opponent, 0, null);
+        messagingTemplate.convertAndSend("/sub/chat/summary/" + opponent.getId(), updatedSummary);
 
-        messagingTemplate.convertAndSend(
-                "/sub/chat/read/" + roomId + "/" + opponent.getId(),
-                "read"
-        );
+        System.out.printf("📥 [읽음 처리 + 요약 전송] 읽은 사람 ID: %d, 상대방 ID: %d%n", readerId, opponent.getId());
     }
 }
