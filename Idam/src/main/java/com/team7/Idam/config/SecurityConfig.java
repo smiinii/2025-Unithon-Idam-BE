@@ -37,17 +37,25 @@ public class SecurityConfig {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-
         JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(jwtTokenProvider, userRepository, slackNotifier);
         JwtRefreshAuthenticationFilter jwtRefreshAuthenticationFilter = new JwtRefreshAuthenticationFilter(jwtTokenProvider);
 
         return http
                 .csrf(csrf -> csrf.disable())
+                .httpBasic(httpBasic -> httpBasic.disable()) // ✅ 기본 인증 비활성화
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        // ✅ 위험 경로 접근 차단
+                        .requestMatchers(
+                                "/actuator/**",
+                                "/manager/**",
+                                "/admin/**",
+                                "/h2-console/**"
+                        ).denyAll()
+
+                        // ✅ 공개 API 허용
                         .requestMatchers(
                                 "/api/signup/**",
                                 "/api/login",
@@ -62,6 +70,8 @@ public class SecurityConfig {
                                 "/sockjs-node/**",
                                 "/info"
                         ).permitAll()
+
+                        // ✅ 사용자 권한 필요한 API
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/**").hasAnyRole("USER", "ADMIN")
                         .anyRequest().authenticated()
