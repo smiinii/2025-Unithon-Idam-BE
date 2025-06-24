@@ -40,7 +40,4 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long> 
         )
     """)
     List<ChatMessage> findLastMessagesForRooms(@Param("rooms") List<ChatRoom> rooms);
-
-    // 4. 단일 채팅방에 대한 최신 메시지 한 건 (가장 자주 쓰임)
-    Optional<ChatMessage> findTopByChatRoomOrderBySentAtDesc(ChatRoom chatRoom);
 }
