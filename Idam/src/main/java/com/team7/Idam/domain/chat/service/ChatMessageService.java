@@ -91,18 +91,11 @@ public class ChatMessageService {
             room.setDeletedByStudent(false);
         }
 
-        boolean deletedForThisUser =
-                (companyId.equals(userId) && room.isDeletedByCompany()) ||
-                        (studentId.equals(userId) && room.isDeletedByStudent());
-
-        if (deletedForThisUser) {
-            throw new SecurityException("삭제된 채팅방입니다.");
-        }
-
         return chatMessageRepository.findByChatRoomOrderBySentAtAsc(room).stream()
                 .map(ChatMessageResponseDto::from)
                 .collect(Collectors.toList());
     }
+
 
     @Transactional
     public void markMessagesAsRead(Long roomId, User reader) {
