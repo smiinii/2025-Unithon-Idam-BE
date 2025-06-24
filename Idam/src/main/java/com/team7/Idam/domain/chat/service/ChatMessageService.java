@@ -52,6 +52,9 @@ public class ChatMessageService {
 
         ChatMessage savedMessage = chatMessageRepository.save(message);
 
+        // ✅ LAZY 로딩 방지를 위한 명시적 set
+        savedMessage.setChatRoom(room);
+
         User receiver = senderId.equals(companyId)
                 ? room.getStudent()
                 : room.getCompany();
@@ -60,6 +63,7 @@ public class ChatMessageService {
 
         return ChatMessageResponseDto.from(savedMessage);
     }
+
 
     public List<ChatMessageResponseDto> getMessagesByRoom(Long roomId, User user) {
         ChatRoom room = chatRoomRepository.findById(roomId)
