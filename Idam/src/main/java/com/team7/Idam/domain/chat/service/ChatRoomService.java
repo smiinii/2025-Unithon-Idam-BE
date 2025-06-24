@@ -1,5 +1,6 @@
 package com.team7.Idam.domain.chat.service;
 
+import com.team7.Idam.domain.chat.dto.ChatMessageResponseDto;
 import com.team7.Idam.domain.chat.dto.ChatRoomRequestDto;
 import com.team7.Idam.domain.chat.dto.ChatRoomResponseDto;
 import com.team7.Idam.domain.chat.entity.ChatMessage;
@@ -43,25 +44,23 @@ public class ChatRoomService {
     public ChatRoomResponseDto createRoom(User company, User student, ChatRoomRequestDto request) {
         validateCompanyAccess();
 
-        // 1. 기존 채팅방 존재 여부 확인
         Optional<ChatRoom> existingRoom =
                 chatRoomRepository.findByCompanyAndStudentAndIsDeletedByCompanyFalseAndIsDeletedByStudentFalse(company, student);
 
         if (existingRoom.isPresent()) {
-            return ChatRoomResponseDto.from(existingRoom.get(), company); // 기존 방 반환
+            return ChatRoomResponseDto.from(existingRoom.get(), company);
         }
 
-        // 2. 없으면 새로 생성
         ChatRoom chatRoom = ChatRoom.builder()
                 .company(company)
                 .student(student)
                 .projectTitle(request.getProjectTitle())
                 .build();
+
         ChatRoom savedRoom = chatRoomRepository.save(chatRoom);
         return ChatRoomResponseDto.from(savedRoom, company);
     }
 
-    // 공통: 유저의 읽지 않은 메시지 수를 Map으로 변환
     private Map<Long, Integer> getUnreadMap(User user) {
         List<ChatMessageRepository.UnreadCountProjection> unreadCounts =
                 chatMessageRepository.findUnreadCountsForUser(user);
@@ -73,7 +72,6 @@ public class ChatRoomService {
                 ));
     }
 
-    // 공통: 채팅방별 마지막 메시지를 Map으로 변환
     private Map<Long, ChatMessage> getLastMessageMap(List<ChatRoom> rooms) {
         List<ChatMessage> lastMessages = chatMessageRepository.findLastMessagesForRooms(rooms);
 
@@ -96,7 +94,10 @@ public class ChatRoomService {
                 .map(room -> {
                     int unreadCount = unreadMap.getOrDefault(room.getId(), 0);
                     ChatMessage lastMessage = lastMessageMap.get(room.getId());
-                    return ChatRoomResponseDto.from(room, company, unreadCount, lastMessage);
+                    ChatMessageResponseDto messageDto = lastMessage != null
+                            ? ChatMessageResponseDto.from(lastMessage)
+                            : null;
+                    return ChatRoomResponseDto.from(room, company, unreadCount, messageDto);
                 })
                 .collect(Collectors.toList());
     }
@@ -113,7 +114,10 @@ public class ChatRoomService {
                 .map(room -> {
                     int unreadCount = unreadMap.getOrDefault(room.getId(), 0);
                     ChatMessage lastMessage = lastMessageMap.get(room.getId());
-                    return ChatRoomResponseDto.from(room, student, unreadCount, lastMessage);
+                    ChatMessageResponseDto messageDto = lastMessage != null
+                            ? ChatMessageResponseDto.from(lastMessage)
+                            : null;
+                    return ChatRoomResponseDto.from(room, student, unreadCount, messageDto);
                 })
                 .collect(Collectors.toList());
     }
