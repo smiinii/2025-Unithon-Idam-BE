@@ -66,15 +66,26 @@ public class StudentProfileController {
         return ResponseEntity.ok(ApiResponse.success("포트폴리오가 삭제되었습니다."));
     }
 
-    // 태그 추가/수정
-    @PutMapping("/{userId}/categories/{categoryId}/tags")
+    // 태그 추가
+    @PatchMapping("/{userId}/categories/{categoryId}/tags")
     public ResponseEntity<ApiResponse<Void>> updateStudentTags(
             @PathVariable Long userId,
             @PathVariable Long categoryId,
             @RequestBody UpdateTagsRequestDto request
     ) {
         studentService.updateStudentTagsByName(userId, categoryId, request);
-        return ResponseEntity.ok(ApiResponse.success("태그가 수정되었습니다."));
+        return ResponseEntity.ok(ApiResponse.success("태그가 추가되었습니다."));
+    }
+
+    // 태그 삭제
+    @DeleteMapping("/{userId}/categories/{categoryId}/tags")
+    public ResponseEntity<ApiResponse<Void>> deleteStudentTags(
+            @PathVariable Long userId,
+            @PathVariable Long categoryId,
+            @RequestBody UpdateTagsRequestDto request
+    ) {
+        studentService.deleteStudentTagsByName(userId, categoryId, request);
+        return ResponseEntity.ok(ApiResponse.success("태그가 삭제되었습니다."));
     }
 
     // 메인 화면 Preview용 모든 학생 조회

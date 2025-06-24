@@ -9,6 +9,7 @@ import com.team7.Idam.global.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Collections;
@@ -58,7 +59,7 @@ public class CompanyProfileService {
         validateCompanyAccess(userId);
 
         Company company = companyRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 학생을 찾을 수 없습니다."));
+                .orElseThrow(() -> new IllegalArgumentException("해당 기업을 찾을 수 없습니다."));
 
         if (company.getProfileImage() != null) { // 프로필 이미지 이미 존재 시
             fileUploadService.delete(company.getProfileImage()); // S3에서 삭제
@@ -93,6 +94,7 @@ public class CompanyProfileService {
     /*
         기업 프로필 정보 수정
      */
+    @Transactional
     public void updateCompanyProfile(Long userId, CompanyProfileUpdateRequestDto request) {
         validateCompanyAccess(userId);
 
