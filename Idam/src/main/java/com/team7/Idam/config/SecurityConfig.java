@@ -1,6 +1,7 @@
 package com.team7.Idam.config;
 
 import com.team7.Idam.domain.user.repository.UserRepository;
+import com.team7.Idam.global.util.SlackNotifier;
 import com.team7.Idam.jwt.JwtRefreshAuthenticationFilter;
 import com.team7.Idam.jwt.JwtTokenProvider;
 import com.team7.Idam.jwt.JwtAuthenticationFilter;
@@ -30,6 +31,7 @@ public class SecurityConfig {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final UserRepository userRepository;
+    private final SlackNotifier slackNotifier;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -38,7 +40,8 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(jwtTokenProvider, userRepository);
+
+        JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(jwtTokenProvider, userRepository, slackNotifier);
         JwtRefreshAuthenticationFilter jwtRefreshAuthenticationFilter = new JwtRefreshAuthenticationFilter(jwtTokenProvider);
 
         return http

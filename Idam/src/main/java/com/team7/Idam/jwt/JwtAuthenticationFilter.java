@@ -2,6 +2,7 @@ package com.team7.Idam.jwt;
 
 import com.team7.Idam.domain.user.entity.User;
 import com.team7.Idam.domain.user.repository.UserRepository;
+import com.team7.Idam.global.util.SlackNotifier;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,6 +23,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final UserRepository userRepository;
+    private final SlackNotifier slackNotifier;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -31,15 +33,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String uri = request.getRequestURI();
         String method = request.getMethod();
 
-        // preview 요청인지 판단
-        boolean isPreviewRequest =
-                uri.equals("/api/students/preview") || uri.equals("/api/company/preview");
-
-        // preview만 제외 (서버 로그 제거)
-        if (!isPreviewRequest) {
-            System.out.println("🔥 요청 URI: " + uri);
-            System.out.println("🔥 HTTP Method: " + method);
-            System.out.println("🔥 들어온 Authorization 헤더: " + request.getHeader("Authorization"));
+        // ✅ 슬랙 알림: 민감 경로 접근 시
+        if (uri.startsWith("/admin") || uri.startsWith("/manager")) {
+            slackNotifier.sendMessage("🚨 /admin 또는 /manager 접근 감지\nURI: " + uri +
+                    "\nMethod: " + method + "\nIP: " + request.getRemoteAddr());
         }
 
         if ("OPTIONS".equalsIgnoreCase(method) ||
@@ -60,9 +57,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         // ✅ 4. JWT 토큰 파싱
         String token = resolveToken(request);
-        if (!isPreviewRequest) {
-            System.out.println("🔥 추출된 Bearer 토큰: " + token);
-        }
 
         if (token != null && jwtTokenProvider.validateToken(token)) {
             Long userId = jwtTokenProvider.getUserIdFromToken(token);
@@ -72,9 +66,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
             List<String> roles = claims.get("roles", List.class);
-            if (!isPreviewRequest) {
-                System.out.println("🔥 JWT 안 roles: " + roles);
-            }
 
             List<SimpleGrantedAuthority> authorities = roles.stream()
                     .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
@@ -87,16 +78,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
-            if (!isPreviewRequest) {
-                System.out.println("🔥 SecurityContext에 세팅된 인증 객체: " + authentication);
-            }
-
-        } else {
-            if (!isPreviewRequest) {
-                System.out.println("❌ JWT 유효성 검증 실패 or 토큰 없음");
-            }
         }
-
         filterChain.doFilter(request, response);
     }
 
