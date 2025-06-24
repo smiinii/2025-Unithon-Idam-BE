@@ -16,8 +16,15 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
     // 학생이 보는 채팅방 목록
     List<ChatRoom> findByStudentAndIsDeletedByStudentFalse(User student);
 
-    @Query("SELECT r FROM ChatRoom r LEFT JOIN FETCH r.messages WHERE r.id = :id")
+    @Query("""
+    SELECT r FROM ChatRoom r
+    LEFT JOIN FETCH r.messages
+    LEFT JOIN FETCH r.company
+    LEFT JOIN FETCH r.student
+    WHERE r.id = :id
+    """)
     Optional<ChatRoom> findWithMessagesById(@Param("id") Long id);
+
 
     Optional<ChatRoom> findByCompanyAndStudentAndProjectTitle(User company, User student, String projectTitle);
 
