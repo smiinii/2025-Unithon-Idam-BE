@@ -18,6 +18,7 @@ public class ChatMessageResponseDto {
     private String content;
     private LocalDateTime sentAt;
     private boolean isRead;
+    private Long roomId;
 
     public static ChatMessageResponseDto from(ChatMessage message) {
         User sender = message.getSender();
@@ -32,6 +33,7 @@ public class ChatMessageResponseDto {
         return ChatMessageResponseDto.builder()
                 .messageId(message.getId())
                 .senderId(sender.getId())
+                .roomId(message.getChatRoom().getId())
                 .senderName(senderName)
                 .content(message.getContent())
                 .sentAt(message.getSentAt())
