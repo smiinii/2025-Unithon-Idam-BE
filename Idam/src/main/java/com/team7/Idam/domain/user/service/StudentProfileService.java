@@ -194,7 +194,7 @@ public class StudentProfileService {
     }
 
     /*
-        태그 추가/수정
+        태그 추가
      */
     @Transactional
     public void updateStudentTagsByName(Long userId, Long categoryId, UpdateTagsRequestDto request) {
@@ -213,6 +213,29 @@ public class StudentProfileService {
         }
 
         student.setTags(new HashSet<>(tags));
+        studentRepository.save(student);
+    }
+
+    /*
+        태그 삭제
+     */
+    @Transactional
+    public void deleteStudentTagsByName(Long userId, Long categoryId, UpdateTagsRequestDto request) {
+        validateStudentAccess(userId);
+
+        Student student = studentRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("학생을 찾을 수 없습니다."));
+
+        List<String> tagNames = request.getTags();
+
+        // 카테고리 내에서만 태그 찾기
+        List<TagOption> tagsToRemove = tagOptionRepository.findAllByTagNameInAndCategoryId(tagNames, categoryId);
+
+        if (tagsToRemove.size() != tagNames.size()) {
+            throw new IllegalArgumentException("해당 카테고리에서 일치하지 않는 태그명이 존재합니다.");
+        }
+
+        student.getTags().removeAll(tagsToRemove);
         studentRepository.save(student);
     }
 
