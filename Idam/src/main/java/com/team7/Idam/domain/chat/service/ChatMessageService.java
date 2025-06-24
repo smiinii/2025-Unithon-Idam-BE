@@ -22,7 +22,6 @@ public class ChatMessageService {
     private final ChatMessageRepository chatMessageRepository;
     private final NotificationService notificationService;
 
-    // 1. 메시지 전송 (DTO 반환)
     public ChatMessageResponseDto sendMessage(Long roomId, User sender, String content) {
         ChatRoom room = chatRoomRepository.findById(roomId)
                 .orElseThrow(() -> new IllegalArgumentException("채팅방이 존재하지 않습니다."));
@@ -35,7 +34,6 @@ public class ChatMessageService {
             throw new SecurityException("채팅방에 참여한 사용자만 메시지를 보낼 수 있습니다.");
         }
 
-        // ✅ 여기서 Soft Delete 복구 로직 추가
         if (room.isDeletedByCompany() && senderId.equals(companyId)) {
             room.setDeletedByCompany(false);
         }
@@ -49,7 +47,6 @@ public class ChatMessageService {
                 .content(content)
                 .build();
 
-        // 마지막 메시지 및 전송 시간 업데이트
         room.updateLastMessage(content);
         chatRoomRepository.save(room);
 
@@ -89,7 +86,6 @@ public class ChatMessageService {
                 .collect(Collectors.toList());
     }
 
-    // 3. 메시지 읽음 처리
     @Transactional
     public void markMessagesAsRead(Long roomId, User reader) {
         ChatRoom room = chatRoomRepository.findById(roomId)

@@ -33,10 +33,21 @@ public class ChatRoomResponseDto {
     }
 
     // unreadCount와 lastMessage까지 포함 (WebSocket에 적합)
-    public static ChatRoomResponseDto from(ChatRoom room, User currentUser, int unreadCount, ChatMessage lastMessage) {
+    public static ChatRoomResponseDto from(ChatRoom room, User currentUser, int unreadCount, ChatMessageResponseDto lastMessageDto) {
         User opponent = room.getCompany().equals(currentUser)
                 ? room.getStudent()
                 : room.getCompany();
+
+        // ✅ 여기에 null 체크 로그 삽입
+        if (opponent == null) {
+            System.out.println("❌ opponent is null!");
+        }
+        if (opponent.getUserType() == UserType.STUDENT && opponent.getStudent() == null) {
+            System.out.println("❌ opponent.getStudent() is null!");
+        }
+        if (opponent.getUserType() == UserType.COMPANY && opponent.getCompany() == null) {
+            System.out.println("❌ opponent.getCompany() is null!");
+        }
 
         String opponentName = (opponent.getUserType() == UserType.STUDENT && opponent.getStudent() != null)
                 ? opponent.getStudent().getNickname()
@@ -55,8 +66,8 @@ public class ChatRoomResponseDto {
                 .opponentId(opponent.getId())
                 .opponentName(opponentName)
                 .opponentProfileImage(opponentProfileImage)
-                .lastMessage(lastMessage != null ? lastMessage.getContent() : room.getLastMessage())
-                .lastMessageAt(lastMessage != null ? lastMessage.getSentAt() : room.getLastMessageAt())
+                .lastMessage(lastMessageDto != null ? lastMessageDto.getContent() : room.getLastMessage())
+                .lastMessageAt(lastMessageDto != null ? lastMessageDto.getSentAt() : room.getLastMessageAt())
                 .projectTitle(room.getProjectTitle())
                 .unreadCount(unreadCount)
                 .build();
