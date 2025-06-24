@@ -41,6 +41,18 @@ public class ChatMessageService {
             room.setDeletedByStudent(false);
         }
 
+        User receiver = senderId.equals(companyId)
+                ? room.getStudent()
+                : room.getCompany();
+
+        // ✅ 메시지를 받은 상대방이 삭제 상태였다면 복구
+        if (room.isDeletedByCompany() && receiver.getId().equals(companyId)) {
+            room.setDeletedByCompany(false);
+        }
+        if (room.isDeletedByStudent() && receiver.getId().equals(studentId)) {
+            room.setDeletedByStudent(false);
+        }
+
         ChatMessage message = ChatMessage.builder()
                 .chatRoom(room)
                 .sender(sender)
@@ -51,13 +63,7 @@ public class ChatMessageService {
         chatRoomRepository.save(room);
 
         ChatMessage savedMessage = chatMessageRepository.save(message);
-
-        // ✅ LAZY 로딩 방지를 위한 명시적 set
-        savedMessage.setChatRoom(room);
-
-        User receiver = senderId.equals(companyId)
-                ? room.getStudent()
-                : room.getCompany();
+        savedMessage.setChatRoom(room); // LAZY 로딩 방지
 
         notificationService.createNotification(receiver, room, content);
 
@@ -85,18 +91,11 @@ public class ChatMessageService {
             room.setDeletedByStudent(false);
         }
 
-        boolean deletedForThisUser =
-                (companyId.equals(userId) && room.isDeletedByCompany()) ||
-                        (studentId.equals(userId) && room.isDeletedByStudent());
-
-        if (deletedForThisUser) {
-            throw new SecurityException("삭제된 채팅방입니다.");
-        }
-
         return chatMessageRepository.findByChatRoomOrderBySentAtAsc(room).stream()
                 .map(ChatMessageResponseDto::from)
                 .collect(Collectors.toList());
     }
+
 
     @Transactional
     public void markMessagesAsRead(Long roomId, User reader) {
