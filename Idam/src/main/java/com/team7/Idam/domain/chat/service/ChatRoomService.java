@@ -63,7 +63,7 @@ public class ChatRoomService {
 
     private Map<Long, Integer> getUnreadMap(User user) {
         List<ChatMessageRepository.UnreadCountProjection> unreadCounts =
-                chatMessageRepository.findUnreadCountsForUser(user);
+                chatMessageRepository.findUnreadCountsForUser(user.getId());
 
         return unreadCounts.stream()
                 .collect(Collectors.toMap(
