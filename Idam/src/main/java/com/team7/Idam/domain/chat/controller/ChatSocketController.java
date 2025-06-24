@@ -45,7 +45,7 @@ public class ChatSocketController {
         messagingTemplate.convertAndSend("/sub/chat/room/" + dto.getRoomId(), savedMessage);
 
         // 2️⃣ 채팅방 요약정보 전송
-        ChatRoom room = chatRoomRepository.findById(dto.getRoomId())
+        ChatRoom room = chatRoomRepository.findWithMessagesById(dto.getRoomId())
                 .orElseThrow(() -> new IllegalArgumentException("채팅방이 존재하지 않습니다."));
 
         User receiver = sender.equals(room.getCompany()) ? room.getStudent() : room.getCompany();
