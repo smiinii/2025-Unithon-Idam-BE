@@ -64,7 +64,6 @@ public class ChatMessageService {
         return ChatMessageResponseDto.from(savedMessage);
     }
 
-
     public List<ChatMessageResponseDto> getMessagesByRoom(Long roomId, User user) {
         ChatRoom room = chatRoomRepository.findById(roomId)
                 .orElseThrow(() -> new IllegalArgumentException("채팅방이 존재하지 않습니다."));
@@ -75,6 +74,14 @@ public class ChatMessageService {
 
         if (!companyId.equals(userId) && !studentId.equals(userId)) {
             throw new SecurityException("이 채팅방에 접근할 수 없습니다.");
+        }
+
+        // ✅ soft delete 상태면 자동 복구
+        if (room.isDeletedByCompany() && companyId.equals(userId)) {
+            room.setDeletedByCompany(false);
+        }
+        if (room.isDeletedByStudent() && studentId.equals(userId)) {
+            room.setDeletedByStudent(false);
         }
 
         boolean deletedForThisUser =
