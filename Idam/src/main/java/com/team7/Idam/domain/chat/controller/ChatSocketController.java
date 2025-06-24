@@ -17,6 +17,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
 import java.security.Principal;
+import java.util.Comparator;
 
 @Controller
 @RequiredArgsConstructor
@@ -61,13 +62,24 @@ public class ChatSocketController {
         User reader = userService.getUserById(readerId);
         chatMessageService.markMessagesAsRead(roomId, reader);
 
-        ChatRoom room = chatRoomRepository.findById(roomId)
+        ChatRoom room = chatRoomRepository.findWithMessagesById(roomId)
                 .orElseThrow(() -> new IllegalArgumentException("채팅방이 존재하지 않습니다."));
 
-        User opponent = room.getCompany().getId().equals(readerId) ? room.getStudent() : room.getCompany();
+        User opponent = room.getCompany().getId().equals(readerId)
+                ? room.getStudent()
+                : room.getCompany();
 
-        ChatRoomResponseDto updatedSummary = ChatRoomResponseDto.from(room, opponent, 0, null);
+        // ✅ 마지막 메시지 가져오기
+        ChatMessageResponseDto latestMessageDto = room.getMessages().stream()
+                .max(Comparator.comparing(m -> m.getSentAt()))
+                .map(ChatMessageResponseDto::from)
+                .orElse(null);
+
+        ChatRoomResponseDto updatedSummary =
+                ChatRoomResponseDto.from(room, opponent, 0, latestMessageDto);
+
         messagingTemplate.convertAndSend("/sub/chat/summary/" + opponent.getId(), updatedSummary);
         messagingTemplate.convertAndSend("/sub/chat/read/" + roomId + "/" + opponent.getId(), "read");
     }
+
 }
