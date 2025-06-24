@@ -64,6 +64,7 @@ public class ChatMessageService {
         return ChatMessageResponseDto.from(savedMessage);
     }
 
+    @Transactional
     public List<ChatMessageResponseDto> getMessagesByRoom(Long roomId, User user) {
         ChatRoom room = chatRoomRepository.findById(roomId)
                 .orElseThrow(() -> new IllegalArgumentException("채팅방이 존재하지 않습니다."));
