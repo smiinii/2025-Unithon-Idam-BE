@@ -8,9 +8,11 @@ import com.team7.Idam.domain.chat.entity.ChatRoom;
 import com.team7.Idam.domain.chat.repository.ChatRoomRepository;
 import com.team7.Idam.domain.chat.service.ChatMessageService;
 import com.team7.Idam.domain.user.entity.User;
+import com.team7.Idam.domain.user.entity.enums.UserType;
 import com.team7.Idam.domain.user.service.UserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.Hibernate;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -43,6 +45,13 @@ public class ChatSocketController {
 
         User receiver = sender.equals(chatRoom.getCompany()) ? chatRoom.getStudent() : chatRoom.getCompany();
 
+        // ✅ Hibernate Lazy 강제 초기화
+        if (receiver.getUserType() == UserType.STUDENT) {
+            Hibernate.initialize(receiver.getStudent());
+        } else if (receiver.getUserType() == UserType.COMPANY) {
+            Hibernate.initialize(receiver.getCompany());
+        }
+
         long unreadCount = chatRoom.getMessages().stream()
                 .filter(m -> !m.getSender().equals(receiver) && !m.isRead())
                 .count();
@@ -53,6 +62,7 @@ public class ChatSocketController {
     }
 
     @MessageMapping("/chat/read")
+    @Transactional
     public void markAsRead(@Payload MarkAsReadRequestDto request, Principal principal) {
         if (principal == null) return;
 
@@ -69,7 +79,13 @@ public class ChatSocketController {
                 ? room.getStudent()
                 : room.getCompany();
 
-        // ✅ 마지막 메시지 가져오기
+        // ✅ Hibernate Lazy 강제 초기화
+        if (opponent.getUserType() == UserType.STUDENT) {
+            Hibernate.initialize(opponent.getStudent());
+        } else if (opponent.getUserType() == UserType.COMPANY) {
+            Hibernate.initialize(opponent.getCompany());
+        }
+
         ChatMessageResponseDto latestMessageDto = room.getMessages().stream()
                 .max(Comparator.comparing(m -> m.getSentAt()))
                 .map(ChatMessageResponseDto::from)
@@ -81,5 +97,4 @@ public class ChatSocketController {
         messagingTemplate.convertAndSend("/sub/chat/summary/" + opponent.getId(), updatedSummary);
         messagingTemplate.convertAndSend("/sub/chat/read/" + roomId + "/" + opponent.getId(), "read");
     }
-
 }
