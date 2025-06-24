@@ -45,7 +45,7 @@ public class ChatRoomService {
         validateCompanyAccess();
 
         Optional<ChatRoom> existingRoom =
-                chatRoomRepository.findByCompanyAndStudentAndIsDeletedByCompanyFalseAndIsDeletedByStudentFalse(company, student);
+                chatRoomRepository.findByCompanyAndStudentAndProjectTitle(company, student, request.getProjectTitle());
 
         if (existingRoom.isPresent()) {
             return ChatRoomResponseDto.from(existingRoom.get(), company);
