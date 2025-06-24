@@ -86,13 +86,18 @@ public class ChatSocketController {
             Hibernate.initialize(opponent.getCompany());
         }
 
+        // ✅ unreadCount 재계산
+        long unreadCount = room.getMessages().stream()
+                .filter(m -> !m.getSender().equals(opponent) && !m.isRead())
+                .count();
+
         ChatMessageResponseDto latestMessageDto = room.getMessages().stream()
                 .max(Comparator.comparing(m -> m.getSentAt()))
                 .map(ChatMessageResponseDto::from)
                 .orElse(null);
 
         ChatRoomResponseDto updatedSummary =
-                ChatRoomResponseDto.from(room, opponent, 0, latestMessageDto);
+                ChatRoomResponseDto.from(room, opponent, (int) unreadCount, latestMessageDto);
 
         messagingTemplate.convertAndSend("/sub/chat/summary/" + opponent.getId(), updatedSummary);
         messagingTemplate.convertAndSend("/sub/chat/read/" + roomId + "/" + opponent.getId(), "read");
