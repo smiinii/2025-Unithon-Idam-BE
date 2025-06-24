@@ -81,10 +81,14 @@ public class ChatSocketController {
 
         User opponent = room.getCompany().getId().equals(readerId) ? room.getStudent() : room.getCompany();
 
-        // 3️⃣ 읽음 정보 요약으로 전송
+        // ✅ 요약 정보 갱신 전송
         ChatRoomResponseDto updatedSummary = ChatRoomResponseDto.from(room, opponent, 0, null);
         messagingTemplate.convertAndSend("/sub/chat/summary/" + opponent.getId(), updatedSummary);
 
+        // ✅ 읽음 이벤트 별도 전송
+        messagingTemplate.convertAndSend("/sub/chat/read/" + roomId + "/" + opponent.getId(), "read");
+
         System.out.printf("📥 [읽음 처리 + 요약 전송] 읽은 사람 ID: %d, 상대방 ID: %d%n", readerId, opponent.getId());
     }
+
 }
