@@ -50,7 +50,7 @@ public class StudentProfileService {
 
         // 포트폴리오 리스트
         List<PortfolioResponseDto> portfolios = student.getPortfolios().stream()
-                .map(p -> new PortfolioResponseDto(p.getPortfolioId(), p.getPortfolio()))
+                .map(PortfolioResponseDto::from)
                 .toList();
 
         return StudentProfileResponseDto.builder()
@@ -135,35 +135,54 @@ public class StudentProfileService {
     }
 
     /*
-        포트폴리오 추가
+        포트폴리오 File 추가
      */
     @Transactional
-    public void addPortfolio(Long userId, MultipartFile file, String url) {
-        // 둘 다 비어있을 때
-        if (file == null && (url == null || url.isBlank())) {
-            throw new IllegalArgumentException("파일 또는 URL 중 하나는 반드시 입력되어야 합니다.");
-        }
-
-        // 둘 다 있을 때 → 허용하지 않음
-        if (file != null && url != null && !url.isBlank()) {
-            throw new IllegalArgumentException("불가능한 접근입니다.");
+    public void addPortfolioFile(Long userId, MultipartFile file) {
+        // 비어있을 때
+        if (file == null) {
+            throw new IllegalArgumentException("파일이 업로드되지 않았습니다.");
         }
 
         Student student = studentRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("학생을 찾을 수 없습니다."));
 
-        String portfolioValue = (file != null)
-                ? fileUploadService.upload(file)
-                : url;
+        String portfolioFile = fileUploadService.upload(file);
 
-        boolean exists = portfolioRepository.existsByStudentIdAndPortfolio(userId, portfolioValue);
+        boolean exists = portfolioRepository.existsByStudentIdAndPortfolio(userId, portfolioFile);
         if (exists) {
-            throw new IllegalArgumentException("이미 동일한 포트폴리오가 등록되어 있습니다.");
+            throw new IllegalArgumentException("이미 동일한 포트폴리오 파일이 등록되어 있습니다.");
         }
 
         Portfolio portfolio = Portfolio.builder()
                 .student(student)
-                .portfolio(portfolioValue)
+                .portfolio(portfolioFile)
+                .build();
+
+        portfolioRepository.save(portfolio);
+    }
+
+    /*
+        포트폴리오 URL 추가
+     */
+    @Transactional
+    public void addPortfolioUrl(Long userId, String url) {
+        // 비어있을 때
+        if (url == null || url.isBlank()) {
+            throw new IllegalArgumentException("URL이 입력되지 않았습니다.");
+        }
+
+        Student student = studentRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("학생을 찾을 수 없습니다."));
+
+        boolean exists = portfolioRepository.existsByStudentIdAndPortfolio(userId, url);
+        if (exists) {
+            throw new IllegalArgumentException("이미 동일한 포트폴리오 주소가 등록되어 있습니다.");
+        }
+
+        Portfolio portfolio = Portfolio.builder()
+                .student(student)
+                .portfolio(url)
                 .build();
 
         portfolioRepository.save(portfolio);

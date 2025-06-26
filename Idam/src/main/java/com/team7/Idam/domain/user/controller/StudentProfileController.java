@@ -48,14 +48,23 @@ public class StudentProfileController {
         return ResponseEntity.ok(ApiResponse.success("프로필 이미지가 삭제되었습니다."));
     }
 
-    // 포트폴리오 추가
-    @PostMapping("/{userId}/portfolios")
-    public ResponseEntity<ApiResponse<Void>> addPortfolio(
+    // 포트폴리오 File 추가
+    @PostMapping("/{userId}/portfolioFile")
+    public ResponseEntity<ApiResponse<Void>> addPortfolioFile(
             @PathVariable Long userId,
-            @RequestPart(required = false) MultipartFile portfolioFile,
-            @RequestPart(required = false) String portfolioUrl) {
+            @RequestPart MultipartFile portfolioFile) {
 
-        studentService.addPortfolio(userId, portfolioFile, portfolioUrl);
+        studentService.addPortfolioFile(userId, portfolioFile);
+        return ResponseEntity.ok(ApiResponse.success("포트폴리오가 등록되었습니다."));
+    }
+
+    // 포트폴리오 URL 추가
+    @PostMapping("/{userId}/portfolioUrl")
+    public ResponseEntity<ApiResponse<Void>> addPortfolioUrl(
+            @PathVariable Long userId,
+            @RequestParam String portfolioUrl) {
+
+        studentService.addPortfolioUrl(userId, portfolioUrl);
         return ResponseEntity.ok(ApiResponse.success("포트폴리오가 등록되었습니다."));
     }
 
