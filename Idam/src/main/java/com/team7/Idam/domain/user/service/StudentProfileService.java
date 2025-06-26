@@ -15,10 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -212,7 +209,26 @@ public class StudentProfileService {
             throw new IllegalArgumentException("해당 카테고리에서 일치하지 않는 태그명이 존재합니다.");
         }
 
-        student.setTags(new HashSet<>(tags));
+        // 기존 태그 이름들을 소문자로 변환하여 Set 구성
+        Set<String> existingTagNamesLower = student.getTags().stream()
+                .map(tag -> tag.getTagName().toLowerCase())
+                .collect(Collectors.toSet());
+
+        // 요청된 태그 중 대소문자 무시하고 중복된 것 찾기
+        List<String> duplicateTagNames = tagNames.stream()
+                .filter(tag -> existingTagNamesLower.contains(tag.toLowerCase()))
+                .toList();
+
+        if (!duplicateTagNames.isEmpty()) {
+            throw new IllegalArgumentException("이미 등록된 태그입니다: " + String.join(", ", duplicateTagNames));
+        }
+
+        // 중복 없으니 추가
+        Set<TagOption> updatedTags = new HashSet<>(student.getTags());
+        updatedTags.addAll(tags);
+        student.setTags(updatedTags);
+
+        student.setTags(updatedTags);
         studentRepository.save(student);
     }
 
