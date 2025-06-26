@@ -107,6 +107,12 @@ public class CompanyProfileService {
         if(request.getWebsite() != null) {
             company.setWebsite(request.getWebsite());
         }
+        if(request.getPhone() != null) {
+            company.getUser().setPhone(request.getPhone());
+        }
+        if(request.getEmail() != null) {
+            company.getUser().setEmail(request.getEmail());
+        }
 
         companyRepository.save(company);
     }

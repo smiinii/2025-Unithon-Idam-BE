@@ -6,4 +6,6 @@ import lombok.Data;
 public class CompanyProfileUpdateRequestDto {
     private String companyDescription;
     private String website;
+    private String phone;
+    private String email;
 }

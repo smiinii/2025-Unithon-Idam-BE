@@ -85,6 +85,12 @@ public class StudentProfileService {
         if (request.getGender() != null) {
             student.setGender(request.getGender());
         }
+        if (request.getEmail() != null) {
+            student.getUser().setEmail(request.getEmail());
+        }
+        if (request.getPhone() != null) {
+            student.getUser().setPhone(request.getPhone());
+        }
 
         studentRepository.save(student);
     }

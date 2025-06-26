@@ -7,4 +7,6 @@ import lombok.Data;
 public class StudentProfileUpdateRequestDto {
     private String nickname;
     private Gender gender;
+    private String phone;
+    private String email;
 }
