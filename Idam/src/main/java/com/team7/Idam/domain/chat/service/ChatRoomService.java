@@ -7,6 +7,8 @@ import com.team7.Idam.domain.chat.entity.ChatMessage;
 import com.team7.Idam.domain.chat.entity.ChatRoom;
 import com.team7.Idam.domain.chat.repository.ChatMessageRepository;
 import com.team7.Idam.domain.chat.repository.ChatRoomRepository;
+import com.team7.Idam.domain.notification.entity.enums.NotificationType;
+import com.team7.Idam.domain.notification.service.NotificationService;
 import com.team7.Idam.domain.user.entity.User;
 import com.team7.Idam.domain.user.entity.enums.UserType;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +29,7 @@ public class ChatRoomService {
 
     private final ChatRoomRepository chatRoomRepository;
     private final ChatMessageRepository chatMessageRepository;
+    private final NotificationService notificationService;
 
     public static void validateCompanyAccess() {
         if (getCurrentUserType() != UserType.COMPANY) {
@@ -58,6 +61,15 @@ public class ChatRoomService {
                 .build();
 
         ChatRoom savedRoom = chatRoomRepository.save(chatRoom);
+
+        // ✅ 알림 전송 (채팅방 생성 후)
+        notificationService.createAndSend(
+                student,                          // 학생에게 알림 보냄
+                savedRoom,                        // 새로 생성된 채팅방
+                "새 채팅방이 생성되었습니다.",      // 알림 메시지
+                NotificationType.NEW_CHAT_ROOM   // 알림 타입
+        );
+
         return ChatRoomResponseDto.from(savedRoom, company);
     }
 
