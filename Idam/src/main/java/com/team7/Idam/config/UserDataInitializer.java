@@ -18,7 +18,6 @@ public class UserDataInitializer implements CommandLineRunner {
     private final UserRepository userRepository;
     private final StudentRepository studentRepository;
     private final CompanyRepository companyRepository;
-    private final PortfolioRepository portfolioRepository;
     private final TagCategoryRepository tagCategoryRepository;
     private final TagOptionRepository tagOptionRepository;
 
@@ -117,17 +116,6 @@ public class UserDataInitializer implements CommandLineRunner {
                 Collections.shuffle(tags);
                 student.setTags(new HashSet<>(tags.subList(0, ThreadLocalRandom.current().nextInt(5, Math.min(tags.size(), 15) + 1))));
                 studentRepository.save(student);
-
-                // 포트폴리오 1~3개 생성
-                int count = ThreadLocalRandom.current().nextInt(1, 4);
-                for (int j = 1; j <= count; j++) {
-                    portfolioRepository.save(
-                            Portfolio.builder()
-                                    .student(student)
-                                    .portfolio(String.format("student%02d_portfolio%d.pdf", studentId, j))
-                                    .build()
-                    );
-                }
             }
         }
 
