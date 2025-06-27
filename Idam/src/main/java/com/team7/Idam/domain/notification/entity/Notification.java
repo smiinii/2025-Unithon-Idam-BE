@@ -28,7 +28,7 @@ public class Notification {
     private User receiver;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "type", nullable = false)
+    @Column(name = "type", nullable = false, length = 30)
     private NotificationType notificationType;
 
     // 알림 메시지
