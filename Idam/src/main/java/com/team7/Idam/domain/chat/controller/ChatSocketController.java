@@ -7,6 +7,7 @@ import com.team7.Idam.domain.chat.dto.MarkAsReadRequestDto;
 import com.team7.Idam.domain.chat.entity.ChatRoom;
 import com.team7.Idam.domain.chat.repository.ChatRoomRepository;
 import com.team7.Idam.domain.chat.service.ChatMessageService;
+import com.team7.Idam.domain.notification.service.NotificationService;
 import com.team7.Idam.domain.user.entity.User;
 import com.team7.Idam.domain.user.entity.enums.UserType;
 import com.team7.Idam.domain.user.service.UserService;
@@ -29,6 +30,7 @@ public class ChatSocketController {
     private final UserService userService;
     private final ChatRoomRepository chatRoomRepository;
     private final SimpMessagingTemplate messagingTemplate;
+    private final NotificationService notificationService;
 
     @MessageMapping("/chat/send")
     @Transactional
@@ -74,6 +76,8 @@ public class ChatSocketController {
 
         ChatRoom room = chatRoomRepository.findWithMessagesById(roomId)
                 .orElseThrow(() -> new IllegalArgumentException("채팅방이 존재하지 않습니다."));
+
+        notificationService.markAsReadByRoom(reader, room); // ✅ 알림도 같이 읽음 처리
 
         User opponent = room.getCompany().getId().equals(readerId)
                 ? room.getStudent()

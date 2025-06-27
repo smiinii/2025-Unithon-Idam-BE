@@ -5,6 +5,7 @@ import com.team7.Idam.domain.chat.entity.ChatMessage;
 import com.team7.Idam.domain.chat.entity.ChatRoom;
 import com.team7.Idam.domain.chat.repository.ChatMessageRepository;
 import com.team7.Idam.domain.chat.repository.ChatRoomRepository;
+import com.team7.Idam.domain.notification.entity.enums.NotificationType;
 import com.team7.Idam.domain.notification.service.NotificationService;
 import com.team7.Idam.domain.user.entity.User;
 import jakarta.transaction.Transactional;
@@ -65,7 +66,13 @@ public class ChatMessageService {
         ChatMessage savedMessage = chatMessageRepository.save(message);
         savedMessage.setChatRoom(room); // LAZY 로딩 방지
 
-        notificationService.createNotification(receiver, room, content);
+        // ✅ 알림 보내기 (WebSocket + DB 저장)
+        notificationService.createAndSend(
+                receiver,
+                room,
+                content,
+                NotificationType.NEW_MESSAGE
+        );
 
         return ChatMessageResponseDto.from(savedMessage);
     }

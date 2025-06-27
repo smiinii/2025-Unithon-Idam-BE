@@ -11,13 +11,12 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class NotificationMessageDto {
-    private Long notificationId;
+public class NotificationSummaryDto {
     private Long chatRoomId;
     private String projectTitle;
     private String otherUserName;
     private String profileImageUrl;
-    private String message;
-    private LocalDateTime createdAt;
-    private String type;
+    private String lastMessage;       // 가장 최근 메시지
+    private LocalDateTime lastMessageAt;
+    private int unreadCount;
 }

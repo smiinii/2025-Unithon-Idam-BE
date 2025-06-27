@@ -27,4 +27,8 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
 
     // ✅ [3] (선택) 특정 유저의 전체 안 읽은 알림 (UI 배지 등에 사용 가능)
     List<Notification> findByReceiverAndIsReadFalseOrderByCreatedAtDesc(User receiver);
+
+    List<Notification> findByReceiverAndChatRoomAndIsReadFalse(User receiver, ChatRoom chatRoom);
+
+    List<Notification> findByReceiverAndIsReadFalse(User receiver);
 }
