@@ -1,6 +1,7 @@
 package com.team7.Idam.domain.user.service;
 
 import com.team7.Idam.domain.user.dto.login.LoginResultDto;
+import com.team7.Idam.domain.user.dto.signup.BusinessStatusResponseDto;
 import com.team7.Idam.domain.user.dto.signup.StudentSignupRequestDto;
 import com.team7.Idam.domain.user.dto.signup.CompanySignupRequestDto;
 import com.team7.Idam.domain.user.dto.login.LoginRequestDto;
@@ -17,6 +18,7 @@ import com.team7.Idam.global.util.RefreshTokenStore;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -32,8 +34,10 @@ public class AuthService {
     private final JwtTokenProvider jwtTokenProvider;
     private final RefreshTokenStore refreshTokenStore;
     private final SlackNotifier slackNotifier;
+    private final BusinessService businessService;
 
     // 학생 회원가입
+    @Transactional
     public void signupStudent(StudentSignupRequestDto request) {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new IllegalArgumentException("이미 등록된 이메일입니다.");
@@ -76,10 +80,11 @@ public class AuthService {
                 .build();
         studentRepository.save(student);
 
-        slackNotifier.sendMessage("✅ 새로운 사용자 가입: " + request.getEmail());
+        slackNotifier.sendMessage("✅ 새로운 학생 가입: " + request.getEmail());
     }
 
     // 기업 회원가입
+    @Transactional
     public void signupCompany(CompanySignupRequestDto request) {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new IllegalArgumentException("이미 등록된 이메일입니다.");
@@ -93,6 +98,21 @@ public class AuthService {
             throw new IllegalArgumentException("이미 등록된 사업자 등록번호입니다.");
         }
 
+        // ① 국세청 API로 사업자번호 상태 확인
+        List<BusinessStatusResponseDto> resultList = businessService.checkBusinessStatus(request.getBusinessRegistrationNumber());
+
+        if (resultList.isEmpty()) {
+            throw new IllegalArgumentException("국세청 응답 오류: 사업자 상태를 확인할 수 없습니다.");
+        }
+
+        BusinessStatusResponseDto status = resultList.get(0);
+        String bStatus = status.getB_stt(); // ex: 계속사업자, 폐업자 등
+
+        if (!"계속사업자".equals(bStatus)) {
+            throw new IllegalArgumentException("유효하지 않은 사업자등록번호입니다. (" + bStatus + ")");
+        }
+
+        // ② 사용자 등록
         User user = User.builder()
                 .email(request.getEmail())
                 .userType(UserType.COMPANY)
@@ -101,6 +121,7 @@ public class AuthService {
                 .build();
         userRepository.save(user);
 
+        // ③ 기업 정보 등록
         Company company = Company.builder()
                 .user(user)
                 .password(passwordEncoder.encode(request.getPassword()))
@@ -113,7 +134,8 @@ public class AuthService {
                 .build();
         companyRepository.save(company);
 
-        slackNotifier.sendMessage("✅ 새로운 사용자 가입: " + request.getEmail());
+        // ④ Slack 알림
+        slackNotifier.sendMessage("✅ 새로운 기업 회원가입: " + request.getEmail());
     }
 
     // 로그인
