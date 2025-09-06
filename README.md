@@ -8,13 +8,15 @@
 <br/>
 
 <div align="center">
-  <img src="https://github.com/user-attachments/assets/efd19a84-8ba2-4a14-ae9d-84188d515adc" alt="Main" style="border-radius: 20px;"/>
+  <img src="https://github.com/user-attachments/assets/8e9f5417-dce5-409e-b66b-62cbddc12b86" alt="Main" width="100%"/>
 </div>
 
 <br/>
 
 <div align="center">
   <a href="https://idam.vercel.app/">홈페이지</a>
+    |  
+  <span style="color:gray;">Swagger</span>
     |  
   <a href="https://www.notion.so/1c5b100014dc80ad9842e0775cb23c93">Notion</a>
 </div>
@@ -73,21 +75,30 @@ IDam은 이 문제를 해결하기 위해 AI 기반 태깅 추천 + 실시간 �
 
 <!-- 주요 기능에 서비스 시연 사진 및 부가 설명 덧붙이기 -->
 
-## 주요 기능
+## ✨ 주요 기능
 
 1. AI 기반 태깅 분석 및 인재 추천
     - 기업이 작성한 프로젝트를 LLM(LLaMA)으로 분석
     - 관련 기술 태그 추출 후, 학생 태그와 점수화 비교 → 적합 인재 추천
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/575aec48-5f9a-4d41-8321-2039eb637d51" alt="2배속_AI매칭_시연" width="80%"/>
+</div>
 
-3. 맞춤형 포트폴리오 입력 및 태그 선택
+2. 맞춤형 포트폴리오 입력 및 태그 선택
     - 학생은 자신의 기술 스택·툴·스타일을 태그 등록
     - 선택형 입력 방식으로 매칭 품질 향상
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/62fa068d-79e8-4d4f-b9ad-2d13c8a5e675" alt="2배속_학생프로필_시연" width="80%"/>
+</div>
 
-4. 1:1 실시간 채팅 및 협업 기능
+3. 1:1 실시간 채팅 및 협업 기능
     - 매칭 즉시 채팅방 생성
     - 기업–학생 간 소통 및 일정 조율 가능
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/5b5a01c8-1cf4-4f7a-8e53-89637ec276a2" alt="2배속_실시간채팅_시연" width="80%"/>
+</div>
 
-5. 회원가입 및 인증 프로세스 (추후 반영 예정)
+4. 회원가입 및 인증 프로세스 (추후 반영 예정)
     - 학생: 학교 포털 API를 통한 대학생 인증 및 간편 로그인
     - 기업: NICE BizAPI를 통한 사업자 인증 및 간편 로그인
     
@@ -97,11 +108,11 @@ IDam은 이 문제를 해결하기 위해 AI 기반 태깅 추천 + 실시간 �
 
 ## 🧑‍💻 팀원 소개
 
-| **이름**    | **역할**        | **담당 업무**                                                |
-|:-----------:|:---------------:|:------------------------------------------------------------|
-| 이성민      | BE              | 실시간 채팅 기능 개발, LLM 기반 추천 시스템 설계 및 FastAPI 연동 |
-| 임재영      | BE              | Spring Boot 기반 매칭 시스템 구현, 데이터베이스 관리            |
-| 김경재      | FE              | React 기반 프론트엔드 구현, UI/UX 디자인 및 사용자 흐름 설계    |
+| **이름** | **역할** | **담당 업무** |
+|:--------:|:--------:|:-------------|
+| <a href="https://github.com/smiinii"><img src="https://avatars.githubusercontent.com/smiinii" width="70px" style="border-radius:50%"/><br/><sub><b>이성민</b></sub></a> | BE | 실시간 채팅 기능 개발, LLM 기반 추천 시스템 설계 및 FastAPI 연동 |
+| <a href="https://github.com/yim0327"><img src="https://avatars.githubusercontent.com/yim0327" width="70px" style="border-radius:50%"/><br/><sub><b>임재영</b></sub></a> | BE | Spring Boot 기반 주요 도메인 로직 및 매칭 시스템 구현, 데이터베이스 관리 |
+| <a href="https://github.com/silly0302"><img src="https://avatars.githubusercontent.com/silly0302" width="70px" style="border-radius:50%"/><br/><sub><b>김경재</b></sub></a> | FE | React 기반 프론트엔드 구현, UI/UX 디자인 및 사용자 흐름 설계 |
 
 ---
 
@@ -167,6 +178,25 @@ IDam은 이 문제를 해결하기 위해 AI 기반 태깅 추천 + 실시간 �
 
 ---
 
-## 📂 문서 자료
+## 📐 아키텍쳐
 
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/f0178978-a060-49dd-affe-9f9a93e6e424" alt="I:Dam_Architecture" width="70%"/>
+</div>
 
+---
+
+## 🗄️ ERD
+
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/8f5266ca-4bbd-4b6b-aedf-d774b35eeb81" alt="I:Dam_ERD" width="70%"/>
+</div>
+
+---
+
+<div align="center">
+
+<h3>💡 <strong>IDam connects, IDam reflects.</strong> 💡</h3>
+<p>이담은 <strong>연결</strong>하고, 기업의 <strong>가치</strong>를 비춰줍니다.</p>
+
+</div>
