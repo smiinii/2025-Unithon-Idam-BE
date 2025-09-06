@@ -16,8 +16,6 @@
 <div align="center">
   <a href="https://idam.vercel.app/">홈페이지</a>
     |  
-  <span style="color:gray;">Swagger</span>
-    |  
   <a href="https://www.notion.so/1c5b100014dc80ad9842e0775cb23c93">Notion</a>
 </div>
 
